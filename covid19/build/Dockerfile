@@ -2,7 +2,7 @@ FROM python:3.7
 
 USER root
 
-RUN adduser --uid 1000 --disabled-password --gecos '' dash
+RUN adduser --uid 1007 --disabled-password --gecos '' dash
 
 COPY --chown=dash:dash ./requirements.txt /requirements.txt
 
