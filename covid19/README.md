@@ -35,3 +35,4 @@ python app.py
 ```
 
 The dashboard can then be used in a browser pointing to link http://127.0.0.1:8050/ .
+Example data of Berlin on the 26th March 2020 is part of this repository.
