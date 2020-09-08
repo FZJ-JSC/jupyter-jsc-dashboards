@@ -1,0 +1,413 @@
+countyID,LKType,LKName,probText
+5334,StädteRegion,Aachen,-67.9
+7131,LK,Ahrweiler,100.0
+9771,LK,Aichach-Friedberg,100.0
+8425,LK,Alb-Donau-Kreis,100.0
+16077,LK,Altenburger Land,99.3
+7132,LK,Altenkirchen,100.0
+15081,LK,Altmarkkreis Salzwedel,88.4
+9171,LK,Altötting,100.0
+7331,LK,Alzey-Worms,100.0
+9361,SK,Amberg,99.1
+9371,LK,Amberg-Sulzbach,100.0
+3451,LK,Ammerland,99.9
+15082,LK,Anhalt-Bitterfeld,99.5
+9561,SK,Ansbach,99.9
+9571,LK,Ansbach,100.0
+9661,SK,Aschaffenburg,100.0
+9671,LK,Aschaffenburg,100.0
+9772,LK,Augsburg,100.0
+9761,SK,Augsburg,100.0
+3452,LK,Aurich,100.0
+7332,LK,Bad Dürkheim,100.0
+9672,LK,Bad Kissingen,100.0
+7133,LK,Bad Kreuznach,100.0
+9173,LK,Bad Tölz-Wolfratshausen,100.0
+8211,SK,Baden-Baden,100.0
+9471,LK,Bamberg,100.0
+9461,SK,Bamberg,100.0
+12060,LK,Barnim,100.0
+14625,LK,Bautzen,100.0
+9472,LK,Bayreuth,100.0
+9462,SK,Bayreuth,99.9
+9172,LK,Berchtesgadener Land,98.2
+6431,LK,Bergstraße,100.0
+11004,SK,Berlin Charlottenburg-Wilmersdorf,100.0
+11002,SK,Berlin Friedrichshain-Kreuzberg,100.0
+11011,SK,Berlin Lichtenberg,100.0
+11010,SK,Berlin Marzahn-Hellersdorf,100.0
+11001,SK,Berlin Mitte,100.0
+11008,SK,Berlin Neukölln,100.0
+11003,SK,Berlin Pankow,100.0
+11012,SK,Berlin Reinickendorf,100.0
+11005,SK,Berlin Spandau,100.0
+11006,SK,Berlin Steglitz-Zehlendorf,100.0
+11007,SK,Berlin Tempelhof-Schöneberg,100.0
+11009,SK,Berlin Treptow-Köpenick,100.0
+7231,LK,Bernkastel-Wittlich,100.0
+8426,LK,Biberach,100.0
+5711,SK,Bielefeld,99.9
+7134,LK,Birkenfeld,100.0
+7232,LK,Bitburg-Prüm,100.0
+8115,LK,Böblingen,100.0
+5911,SK,Bochum,100.0
+8435,LK,Bodenseekreis,100.0
+5314,SK,Bonn,100.0
+15083,LK,Börde,100.0
+5554,LK,Borken,100.0
+5512,SK,Bottrop,100.0
+12051,SK,Brandenburg a.d.Havel,99.3
+3101,SK,Braunschweig,100.0
+8315,LK,Breisgau-Hochschwarzwald,100.0
+4011,SK,Bremen,100.0
+4012,SK,Bremerhaven,98.9
+15084,LK,Burgenlandkreis,99.8
+8235,LK,Calw,100.0
+3351,LK,Celle,99.9
+9372,LK,Cham,100.0
+14511,SK,Chemnitz,100.0
+3453,LK,Cloppenburg,100.0
+9463,SK,Coburg,100.0
+9473,LK,Coburg,100.0
+7135,LK,Cochem-Zell,100.0
+5558,LK,Coesfeld,99.9
+12052,SK,Cottbus,98.7
+3352,LK,Cuxhaven,99.1
+9174,LK,Dachau,100.0
+12061,LK,Dahme-Spreewald,100.0
+6411,SK,Darmstadt,100.0
+6432,LK,Darmstadt-Dieburg,100.0
+9271,LK,Deggendorf,100.0
+3401,SK,Delmenhorst,95.7
+15001,SK,Dessau-Roßlau,100.0
+3251,LK,Diepholz,100.0
+9773,LK,Dillingen a.d.Donau,100.0
+9279,LK,Dingolfing-Landau,100.0
+1051,LK,Dithmarschen,99.9
+9779,LK,Donau-Ries,100.0
+7333,LK,Donnersbergkreis,100.0
+5913,SK,Dortmund,100.0
+14612,SK,Dresden,100.0
+5112,SK,Duisburg,100.0
+5358,LK,Düren,100.0
+5111,SK,Düsseldorf,100.0
+9175,LK,Ebersberg,99.3
+16061,LK,Eichsfeld,100.0
+9176,LK,Eichstätt,100.0
+16056,SK,Eisenach,-61.4
+12062,LK,Elbe-Elster,90.6
+3402,SK,Emden,92.9
+8316,LK,Emmendingen,100.0
+3454,LK,Emsland,100.0
+5954,LK,Ennepe-Ruhr-Kreis,100.0
+8236,LK,Enzkreis,100.0
+9177,LK,Erding,100.0
+16051,SK,Erfurt,100.0
+9562,SK,Erlangen,99.6
+9572,LK,Erlangen-Höchstadt,100.0
+14521,LK,Erzgebirgskreis,100.0
+5113,SK,Essen,100.0
+8116,LK,Esslingen,100.0
+5366,LK,Euskirchen,100.0
+1001,SK,Flensburg,100.0
+9474,LK,Forchheim,100.0
+7311,SK,Frankenthal,99.9
+12053,SK,Frankfurt (Oder),100.0
+6412,SK,Frankfurt am Main,100.0
+8311,SK,Freiburg i.Breisgau,100.0
+9178,LK,Freising,100.0
+8237,LK,Freudenstadt,100.0
+9272,LK,Freyung-Grafenau,99.8
+3455,LK,Friesland,91.7
+6631,LK,Fulda,100.0
+9179,LK,Fürstenfeldbruck,100.0
+9563,SK,Fürth,100.0
+9573,LK,Fürth,100.0
+9180,LK,Garmisch-Partenkirchen,100.0
+5513,SK,Gelsenkirchen,100.0
+16052,SK,Gera,96.3
+7334,LK,Germersheim,100.0
+6531,LK,Gießen,100.0
+3151,LK,Gifhorn,100.0
+8117,LK,Göppingen,100.0
+14626,LK,Görlitz,100.0
+3153,LK,Goslar,100.0
+16067,LK,Gotha,100.0
+3159,LK,Göttingen,100.0
+3456,LK,Grafschaft Bentheim,100.0
+16076,LK,Greiz,100.0
+6433,LK,Groß-Gerau,100.0
+9774,LK,Günzburg,100.0
+5754,LK,Gütersloh,100.0
+5914,SK,Hagen,100.0
+15002,SK,Halle,100.0
+2000,SK,Hamburg,100.0
+3252,LK,Hameln-Pyrmont,100.0
+5915,SK,Hamm,100.0
+3241,Region,Hannover,100.0
+3353,LK,Harburg,100.0
+15085,LK,Harz,100.0
+9674,LK,Haßberge,100.0
+12063,LK,Havelland,99.5
+3358,LK,Heidekreis,99.9
+8221,SK,Heidelberg,100.0
+8135,LK,Heidenheim,100.0
+8121,SK,Heilbronn,100.0
+8125,LK,Heilbronn,100.0
+5370,LK,Heinsberg,86.1
+3154,LK,Helmstedt,100.0
+5758,LK,Herford,100.0
+5916,SK,Herne,100.0
+6632,LK,Hersfeld-Rotenburg,99.9
+1053,LK,Herzogtum Lauenburg,100.0
+16069,LK,Hildburghausen,96.3
+3254,LK,Hildesheim,100.0
+5958,LK,Hochsauerlandkreis,100.0
+6434,LK,Hochtaunuskreis,100.0
+9464,SK,Hof,100.0
+9475,LK,Hof,100.0
+8126,LK,Hohenlohekreis,100.0
+3255,LK,Holzminden,100.0
+5762,LK,Höxter,100.0
+16070,LK,Ilm-Kreis,100.0
+9161,SK,Ingolstadt,99.7
+16053,SK,Jena,100.0
+15086,LK,Jerichower Land,98.6
+7335,LK,Kaiserslautern,100.0
+7312,SK,Kaiserslautern,100.0
+8215,LK,Karlsruhe,100.0
+8212,SK,Karlsruhe,100.0
+6633,LK,Kassel,100.0
+6611,SK,Kassel,100.0
+9762,SK,Kaufbeuren,99.6
+9273,LK,Kelheim,100.0
+9763,SK,Kempten,98.5
+1002,SK,Kiel,100.0
+9675,LK,Kitzingen,99.9
+5154,LK,Kleve,100.0
+7111,SK,Koblenz,100.0
+5315,SK,Köln,100.0
+8335,LK,Konstanz,100.0
+5114,SK,Krefeld,100.0
+9476,LK,Kronach,100.0
+9477,LK,Kulmbach,100.0
+7336,LK,Kusel,99.8
+16065,LK,Kyffhäuserkreis,98.5
+6532,LK,Lahn-Dill-Kreis,100.0
+7313,SK,Landau i.d.Pfalz,99.8
+9181,LK,Landsberg a.Lech,100.0
+9261,SK,Landshut,100.0
+9274,LK,Landshut,100.0
+3457,LK,Leer,99.9
+14729,LK,Leipzig,100.0
+14713,SK,Leipzig,100.0
+5316,SK,Leverkusen,100.0
+9478,LK,Lichtenfels,100.0
+6533,LK,Limburg-Weilburg,100.0
+9776,LK,Lindau,100.0
+5766,LK,Lippe,100.0
+8336,LK,Lörrach,100.0
+1003,SK,Lübeck,100.0
+3354,LK,Lüchow-Dannenberg,100.0
+8118,LK,Ludwigsburg,100.0
+7314,SK,Ludwigshafen,100.0
+13076,LK,Ludwigslust/Parchim,-64.0
+3355,LK,Lüneburg,100.0
+15003,SK,Magdeburg,100.0
+6435,LK,Main-Kinzig-Kreis,100.0
+9677,LK,Main-Spessart,100.0
+8128,LK,Main-Tauber-Kreis,96.8
+6436,LK,Main-Taunus-Kreis,100.0
+7315,SK,Mainz,100.0
+7339,LK,Mainz-Bingen,100.0
+8222,SK,Mannheim,100.0
+15087,LK,Mansfeld-Südharz,100.0
+6534,LK,Marburg-Biedenkopf,100.0
+12064,LK,Märkisch-Oderland,100.0
+5962,LK,Märkischer Kreis,99.7
+7137,LK,Mayen-Koblenz,100.0
+13071,LK,Mecklenburgische Seenplatte,100.0
+14627,LK,Meißen,100.0
+9764,SK,Memmingen,100.0
+10042,LK,Merzig-Wadern,96.5
+5158,LK,Mettmann,100.0
+9182,LK,Miesbach,100.0
+9676,LK,Miltenberg,100.0
+5770,LK,Minden-Lübbecke,100.0
+14522,LK,Mittelsachsen,100.0
+5116,SK,Mönchengladbach,100.0
+9183,LK,Mühldorf a.Inn,100.0
+5117,SK,Mülheim a.d.Ruhr,100.0
+9162,SK,München,100.0
+9184,LK,München,100.0
+5515,SK,Münster,100.0
+8225,LK,Neckar-Odenwald-Kreis,100.0
+9775,LK,Neu-Ulm,100.0
+9185,LK,Neuburg-Schrobenhausen,100.0
+9373,LK,Neumarkt i.d.OPf.,100.0
+1004,SK,Neumünster,99.9
+10043,LK,Neunkirchen,100.0
+9374,LK,Neustadt a.d.Waldnaab,100.0
+7316,SK,Neustadt a.d.Weinstraße,100.0
+9575,LK,Neustadt/Aisch-Bad Windsheim,-70.3
+7138,LK,Neuwied,100.0
+3256,LK,Nienburg (Weser),99.9
+1054,LK,Nordfriesland,100.0
+16062,LK,Nordhausen,89.60000000000002
+14730,LK,Nordsachsen,100.0
+13074,LK,Nordwestmecklenburg,100.0
+3155,LK,Northeim,100.0
+9564,SK,Nürnberg,100.0
+9574,LK,Nürnberger Land,100.0
+9780,LK,Oberallgäu,100.0
+5374,LK,Oberbergischer Kreis,100.0
+5119,SK,Oberhausen,100.0
+12065,LK,Oberhavel,100.0
+12066,LK,Oberspreewald-Lausitz,92.9
+6437,LK,Odenwaldkreis,100.0
+12067,LK,Oder-Spree,100.0
+6438,LK,Offenbach,100.0
+6413,SK,Offenbach,99.9
+3458,LK,Oldenburg,100.0
+3403,SK,Oldenburg,100.0
+5966,LK,Olpe,100.0
+8317,LK,Ortenaukreis,100.0
+3459,LK,Osnabrück,100.0
+3404,SK,Osnabrück,100.0
+8136,LK,Ostalbkreis,100.0
+9777,LK,Ostallgäu,100.0
+3356,LK,Osterholz,99.7
+1055,LK,Ostholstein,100.0
+12068,LK,Ostprignitz-Ruppin,99.9
+5774,LK,Paderborn,100.0
+9262,SK,Passau,100.0
+9275,LK,Passau,100.0
+3157,LK,Peine,100.0
+9186,LK,Pfaffenhofen a.d.Ilm,100.0
+8231,SK,Pforzheim,100.0
+1056,LK,Pinneberg,100.0
+7317,SK,Pirmasens,99.9
+1057,LK,Plön,99.9
+12054,SK,Potsdam,100.0
+12069,LK,Potsdam-Mittelmark,100.0
+12070,LK,Prignitz,88.5
+8216,LK,Rastatt,100.0
+8436,LK,Ravensburg,100.0
+5562,LK,Recklinghausen,100.0
+9276,LK,Regen,100.0
+9375,LK,Regensburg,100.0
+9362,SK,Regensburg,100.0
+8119,LK,Rems-Murr-Kreis,100.0
+5120,SK,Remscheid,99.7
+1058,LK,Rendsburg-Eckernförde,100.0
+8415,LK,Reutlingen,100.0
+5362,LK,Rhein-Erft-Kreis,100.0
+7140,LK,Rhein-Hunsrück-Kreis,100.0
+5162,LK,Rhein-Kreis Neuss,100.0
+7141,LK,Rhein-Lahn-Kreis,100.0
+8226,LK,Rhein-Neckar-Kreis,100.0
+7338,LK,Rhein-Pfalz-Kreis,99.9
+5382,LK,Rhein-Sieg-Kreis,100.0
+6439,LK,Rheingau-Taunus-Kreis,100.0
+5378,LK,Rheinisch-Bergischer Kreis,100.0
+9673,LK,Rhön-Grabfeld,100.0
+9163,SK,Rosenheim,100.0
+9187,LK,Rosenheim,100.0
+13072,LK,Rostock,95.1
+13003,SK,Rostock,99.9
+3357,LK,Rotenburg (Wümme),100.0
+9576,LK,Roth,100.0
+9277,LK,Rottal-Inn,100.0
+8325,LK,Rottweil,99.8
+16074,LK,Saale-Holzland-Kreis,100.0
+16075,LK,Saale-Orla-Kreis,90.2
+15088,LK,Saalekreis,100.0
+16073,LK,Saalfeld-Rudolstadt,100.0
+10045,LK,Saar-Pfalz-Kreis,100.0
+10044,LK,Saarlouis,100.0
+14628,LK,Sächsische Schweiz-Osterzgebirge,100.0
+3102,SK,Salzgitter,100.0
+15089,LK,Salzlandkreis,100.0
+10046,LK,Sankt Wendel,100.0
+3257,LK,Schaumburg,100.0
+1059,LK,Schleswig-Flensburg,100.0
+16066,LK,Schmalkalden-Meiningen,100.0
+9565,SK,Schwabach,99.1
+8127,LK,Schwäbisch Hall,100.0
+6634,LK,Schwalm-Eder-Kreis,100.0
+9376,LK,Schwandorf,100.0
+8326,LK,Schwarzwald-Baar-Kreis,100.0
+9678,LK,Schweinfurt,100.0
+9662,SK,Schweinfurt,99.9
+13004,SK,Schwerin,100.0
+1060,LK,Segeberg,100.0
+5970,LK,Siegen-Wittgenstein,100.0
+8437,LK,Sigmaringen,100.0
+5974,LK,Soest,100.0
+5122,SK,Solingen,100.0
+16068,LK,Sömmerda,99.9
+16072,LK,Sonneberg,100.0
+7318,SK,Speyer,99.7
+12071,LK,Spree-Neiße,99.9
+3359,LK,Stade,100.0
+10041,LK,Stadtverband Saarbrücken,100.0
+9188,LK,Starnberg,100.0
+1061,LK,Steinburg,100.0
+5566,LK,Steinfurt,100.0
+15090,LK,Stendal,100.0
+1062,LK,Stormarn,100.0
+9263,SK,Straubing,100.0
+9278,LK,Straubing-Bogen,100.0
+8111,SK,Stuttgart,100.0
+7337,LK,Südliche Weinstraße,100.0
+7340,LK,Südwestpfalz,100.0
+16054,SK,Suhl,99.7
+12072,LK,Teltow-Fläming,100.0
+9377,LK,Tirschenreuth,100.0
+9189,LK,Traunstein,100.0
+7211,SK,Trier,100.0
+7235,LK,Trier-Saarburg,100.0
+8416,LK,Tübingen,100.0
+8327,LK,Tuttlingen,99.8
+12073,LK,Uckermark,99.1
+3360,LK,Uelzen,100.0
+8421,SK,Ulm,100.0
+5978,LK,Unna,100.0
+16064,LK,Unstrut-Hainich-Kreis,99.6
+9778,LK,Unterallgäu,100.0
+3460,LK,Vechta,100.0
+3361,LK,Verden,99.9
+5166,LK,Viersen,100.0
+6535,LK,Vogelsbergkreis,100.0
+14523,LK,Vogtlandkreis,100.0
+13075,LK,Vorpommern/Greifswald,-65.5
+13073,LK,Vorpommern/Rügen,-64.2
+7233,LK,Vulkaneifel,100.0
+6635,LK,Waldeck-Frankenberg,100.0
+8337,LK,Waldshut,100.0
+5570,LK,Warendorf,100.0
+16063,LK,Wartburgkreis,100.0
+9363,SK,Weiden i.d.OPf.,100.0
+9190,LK,Weilheim-Schongau,100.0
+16055,SK,Weimar,100.0
+16071,LK,Weimarer Land,99.9
+9577,LK,Weißenburg-Gunzenhausen,100.0
+6636,LK,Werra-Meißner-Kreis,99.9
+5170,LK,Wesel,100.0
+3461,LK,Wesermarsch,99.7
+7143,LK,Westerwaldkreis,100.0
+6440,LK,Wetteraukreis,100.0
+6414,SK,Wiesbaden,100.0
+3405,SK,Wilhelmshaven,62.5
+15091,LK,Wittenberg,100.0
+3462,LK,Wittmund,89.4
+3158,LK,Wolfenbüttel,99.9
+3103,SK,Wolfsburg,100.0
+7319,SK,Worms,100.0
+9479,LK,Wunsiedel i.Fichtelgebirge,100.0
+5124,SK,Wuppertal,100.0
+9663,SK,Würzburg,100.0
+9679,LK,Würzburg,100.0
+8417,LK,Zollernalbkreis,99.7
+7320,SK,Zweibrücken,99.9
+14524,LK,Zwickau,100.0
