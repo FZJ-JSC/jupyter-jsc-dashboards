@@ -1,7 +1,8 @@
 ## Dashboard for Bayesian Spatio-Temporal Interaction Model (BSTIM)
 
-See the dashboard in action at [Juelich Supercomputing Centre](https://covid19-bayesian.fz-juelich.de)
+See the dashboard in action at [Juelich Supercomputing Centre](https://covid19-bayesian.fz-juelich.de).  
 For modeling details and simulation codes please check the [GitHub Repo](https://github.com/neuroinfo-os/BSTIM-Covid19)
+of the [Neuroinformatics group at the University of Osnabrück](https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics).
 
 ![Dashboard screenshot](img/covid19bstim-screenshot.png)
 
