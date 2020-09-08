@@ -7,7 +7,7 @@ of the [Neuroinformatics group at the University of Osnabrück](https://www.ikw.
 ![Dashboard screenshot](img/covid19bstim-screenshot.png)
 
 
-### Introduction to the Dashboard
+### Introduction to the model
 
 Current data and forecast of the daily reported new infections with COVID-19 for districts in Germany. The model describes the temporal development of new infections over a period of several weeks. It not only considers the most probable development or the average development, but also estimates the probability for different scenarios that are compatible with the current data situation. In addition, the spatio-temporal component of the infection event is estimated and presented as a so-called "interaction kernel". The work is based on an adaptation of the BSTIM model, adapted to the COVID-19 situation. The model describes the daily updated reporting data based on the data of the RKI.
 
