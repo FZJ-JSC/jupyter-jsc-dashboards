@@ -20,7 +20,7 @@
 #    app.run_server(debug=True)
 # - choose init_countyid (default="Berlin Mitte"->11001)
 
-# In[2]:
+# In[1]:
 
 
 import dash
@@ -31,7 +31,14 @@ from dash.dependencies import Input, Output, State
 import dash_player
 from flask_caching import Cache
 
+import os
 import pandas as pd
+
+
+# In[ ]:
+
+
+#print(dcc.__version__)
 
 
 # When running in JupyterHub (or Binder), call the `infer_jupyter_config` function to detect the proxy configuration. This will detect the proper request_pathname_prefix and server_url values to use when displaying Dash apps. For example:  
@@ -39,7 +46,7 @@ import pandas as pd
 # request_pathname_prefix = `/user/j.goebbert@fz-juelich.de/jureca_login/`  
 # For details please check the source here https://github.com/plotly/jupyter-dash/blob/v0.2.1.post1/jupyter_dash/comms.py#L33
 
-# In[6]:
+# In[ ]:
 
 
 #from jupyter_dash import JupyterDash
@@ -51,7 +58,7 @@ import pandas as pd
 # #### Create a Dash Flask server
 # Requests the browser to load Bootstrap 
 
-# In[44]:
+# In[ ]:
 
 
 from pathlib import Path
@@ -60,7 +67,11 @@ from pathlib import Path
 import os
 base_url=os.getenv("BASE_URL")
 prefix_path=os.getenv("PREFIX_PATH")
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__,
+                  external_stylesheets=[dbc.themes.BOOTSTRAP],
+                  update_title=None,
+                  suppress_callback_exceptions=True, # because of multi-page setup
+                 )
 # external_stylesheets=[dbc.themes.BOOTSTRAP] -> default theme
 # external_stylesheets=[dbc.themes.CYBORG]    -> dark theme
 
@@ -89,7 +100,7 @@ cache.clear()
 server = app.server
 
 
-# In[45]:
+# In[ ]:
 
 
 from datetime import datetime as dt, timedelta
@@ -103,19 +114,30 @@ metadata = pd.read_csv("/app/assets/metadata.csv")
 #for index, row in metadata.iterrows():
 #    print(row['countyId'])
 
-min_date=dt(2020, 4, 27).date()#
+deltadays = 25
+
+if os.environ.get('MIN_DATE', '<no_min_date>') != '<no_min_date>':
+    min_date=dt.strptime(os.environ.get('MIN_DATE'), '%Y_%m_%d').date()
+else:
+    min_date=dt.strptime("2020_02_23", "%Y_%m_%d").date()
+#min_date#dt(2020, 1, 29).date()
 if os.environ.get('MAX_DATE', '<no_max_date>') != '<no_max_date>':
-    max_date=dt.strptime(os.environ.get('MAX_DATE'), '%Y-%m-%d')
+    max_date=dt.strptime(os.environ.get('MAX_DATE'), '%Y_%m_%d').date()
 else:
     max_date=dt.today().date()
-#max_date=dt.today().date()#dt(2020, 6, 16).date() # dt.today().date()
+#max_date=dt.today().date()#dt(2020, 10, 1).date() # dt.today().date()
+
 if os.environ.get('INIT_DATE', '<no_init_date>') != '<no_init_date>':
-    init_date=dt.strptime(os.environ.get('INIT_DATE'), '%Y-%m-%d')
+    init_date=dt.strptime(os.environ.get('INIT_DATE'), '%Y_%m_%d').date()
 else:
     init_date=dt.today().date()
-#init_date=dt.today().date()#dt(2020, 6, 16).date() # dt.today().date()
+#init_date=dt.today().date()#(2020, 9, 1).date() # dt.today().date()
+init_date=init_date -timedelta(days=deltadays)
+
+init_assets_dir = init_date.strftime('%Y_%m_%d') + "/"
+#print(init_assets_dir)
+
 init_countyid=11001
-deltadays = 25
 
 def get_assets_dir(date):
     date = dt.strptime(date.split(' ')[0], '%Y-%m-%d')
@@ -125,7 +147,7 @@ def get_assets_dir(date):
 
 # #### Create interactive map of Germany
 
-# In[1]:
+# In[ ]:
 
 
 ## load & initialize static data
@@ -156,31 +178,38 @@ counties_metadf = pd.DataFrame(data={
 #counties_metadf.to_csv('counties_metadata.csv', index=False)
 
 
-# In[47]:
+# In[ ]:
 
 
 ## load dynamic data
 # => dataframe 'inf'
 import plotly.graph_objects as go
+from numpy import nan
 
-def create_map(mapcsv_path):
+def create_map(mapcsv_path, colName):
 
-    # read number of infections from csv file
-    mapcsv = pd.read_csv(mapcsv_path)
-    #print(mapcsv.loc[mapcsv['countyID'] == 3159]) # test with Freiburg
-
-    # create (correctly sorted) dataframe from no.infections
     infArr=[]
-    # loop over all counties and read no.infections from mapcsv
-    for feat in counties_geojson['features']: # same loop as for df (important)
-        cca_str = feat['properties'].get('RS')
-        if cca_str is not None:
-            # read value for this county from mapcsv
-            cca_valuedf = mapcsv.loc[mapcsv['countyID']==int(cca_str), 'newInf100k']
-            cca_value = next(iter(cca_valuedf), 0.0)
-            infArr.append(cca_value)
-        else:
-            infArr.append(0.0)
+    try:
+        # read number of infections from csv file        
+        mapcsv = pd.read_csv(mapcsv_path)
+        #print(mapcsv.loc[mapcsv['countyID'] == 3159]) # test with Göttingen
+
+        # create (correctly sorted) dataframe from no.infections
+        # loop over all counties and read no.infections from mapcsv 
+        for feat in counties_geojson['features']: # same loop as for df (important)
+            cca_str = feat['properties'].get('RS')
+            if cca_str is not None:
+                # read model value for this county from mapcsv
+                cca_valuedf = mapcsv.loc[mapcsv['countyID']==int(cca_str), colName] #'newInf100k']
+                cca_value = next(iter(cca_valuedf), 0.0)
+                infArr.append(cca_value)             
+            else:
+                infArr.append(0.0)
+    except: #IOError as e:
+        print("File not found: " + mapcsv_path)
+        for feat in counties_geojson['features']:
+            infArr.append(nan)
+
     counties_infdf = pd.DataFrame(data={'infections': infArr})
 
     # test
@@ -194,7 +223,7 @@ def create_map(mapcsv_path):
                             z=counties_infdf.infections,
                             text=counties_metadf.names,
                             colorscale="Jet",
-                            colorbar=dict(thickness=20, ticklen=3, title="Neuinfektionen pro 100.000 Einwohner", titleside="right"),
+                            colorbar=dict(thickness=20, ticklen=3, title="Neuinfektionen pro 100.000 Einwohner und Tag", titleside="right"),
                             zmin=0, zmax=10,
                             marker_opacity=0.5, marker_line_width=0,
                             hovertemplate=
@@ -203,34 +232,36 @@ def create_map(mapcsv_path):
                                 "<extra></extra>",)
                       )
     mapfig.update_layout(
-                        #autosize=True,
-                        legend=dict(
-                            # Adjust click behavior
-                            itemclick="toggleothers",
-                            itemdoubleclick="toggle",
-                        ),
-                        xaxis=dict(
-                            autorange='reversed',
-                            fixedrange=True
-                        ),
-                        yaxis=dict(
-                            autorange='reversed',
-                            fixedrange=True
-                        ),
-                        #width=520, height=540, # has no impact on webside
-                        mapbox_style="carto-positron",
+                        uirevision=True, # keep zoom,panning, etc. when updating
+                        autosize=True,
+                        #legend=dict(
+                        #    # Adjust click behavior
+                        #    itemclick="toggleothers",
+                        #    itemdoubleclick="toggle",
+                        #),
+                        #xaxis=dict(
+                        #    autorange='reversed',
+                        #    fixedrange=True
+                        #),
+                        #yaxis=dict(
+                        #    autorange='reversed',
+                        #    fixedrange=True
+                        #),
+                        width=500, height=450,
+                        mapbox_style="carto-positron", # https://plotly.com/python/mapbox-layers/
                         mapbox_zoom=4.5,
                         mapbox_center = {"lat": 51.30, "lon": 10.45},
                         margin={"r":0,"t":0,"l":0,"b":0})
     return mapfig
 
-#mapfig = create_map("assets/figures/2020_06_12/map.csv")
-#mapfig.show(config={"displayModeBar": False, "showTips": False, "modeBarButtonsToRemove": ['toImage']}) # "staticPlot": True})
+init_mapfig_bstim = create_map("assets/figures/" + init_assets_dir + "map.csv", 'newInf100k')
+init_mapfig_rki   = create_map("assets/figures/" + init_assets_dir + "map.csv", 'newInf100k_RKI')
+#init_mapfig_bstim.show(config={"displayModeBar": False, "showTips": False, "modeBarButtonsToRemove": ['toImage']}) # "staticPlot": True})
 
 
 # #### Define the top navigation bar
 
-# In[48]:
+# In[ ]:
 
 
 #####################
@@ -243,16 +274,17 @@ disclaimer_modal = html.Div(
             -----
             #####  BSTIM-Covid19 
             -----
-            Aktuelle Daten und Vorhersage der Neuinfizierungen mit COVID-19 für Landkreise in Deutschland.
-            Das Model beschreibt die zeitliche Entwicklung der Neuinfizierungen in einen Zeitraum von 4 Wochen.
-            Das Model  beschreibt dazu nicht nur die wahrscheinlichste Entwicklung oder die mittlere Entwicklung,
-            sondern schätzt die Wahrscheinlichkeit für verschiedene Szenarien ab, die mit der aktuellen Datenlage kompatibel sind.
-            Zudem wir der Interaktionsradius vom Infektionsgeschehen geschätzt und als Interaktionskernel dargestellt.
-            Die Arbeit basiert auf einer Adaption des [BSTIM Models](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0225838#pone.0225838.ref009) angepasst an die COVID-19 Situation.
-            Das Model beschreibt die tagesaktuellen Daten basierend auf den [Daten](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0/data?orderBy=Meldedatum) des RKI.
-                            
-            Alle hier präsentierten Ergebnisse basieren auf statistischen Methoden und bilden damit nicht das reale Geschehen, sondern Schätzungen ab, die von der wirklichen Situation abweichen können.
-            Dies ist bei der Interpretation der Ergebnisse zu berücksichtigen. 
+            Aktuelle Daten und Vorhersage der täglich gemeldeten Neuinfektionen mit COVID-19 für Landkreise in Deutschland.
+            Das Model beschreibt die zeitliche Entwicklung der Neuinfektionen in einen Zeitraum von mehreren Wochen.
+            Es betrachtet dazu nicht nur die wahrscheinlichste Entwicklung oder die mittlere Entwicklung, sondern schätzt die Wahrscheinlichkeit für verschiedene Szenarien ab, die mit der aktuellen Datenlage kompatibel sind.
+            Zudem wird die räumlich-zeitliche Komponente des Infektionsgeschehens geschätzt und als sogenannter "Interaktionskernel" dargestellt.
+            Die Arbeit basiert auf einer Adaption des [BSTIM Models](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0225838#pone.0225838.ref009), angepasst an die COVID-19 Situation.
+            Das Model beschreibt die tagesaktuellen Meldedaten basierend auf den [Daten](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0/data?orderBy=Meldedatum) des RKI.
+            
+            Alle hier präsentierten Ergebnisse resultieren aus einer Modellierung basierend auf statistischen Methoden.
+            Sie bilden damit nicht das reale Geschehen, sondern Schätzungen ab, die von der wirklichen Situation abweichen können.
+            Dies ist bei der Interpretation der Ergebnisse zu berücksichtigen.
+            Ebenso ist zu beachten, dass die Qualität dieser statistischen Methoden maßgeblich von der Qualität der zugrunde liegenden Daten abhängt.
             """
         ),
         html.Span(
@@ -300,14 +332,13 @@ disclaimer_modal = html.Div(
     [Input("disclaimer_modal_open", "n_clicks"), Input("disclaimer_modal_close", "n_clicks")],
     [State("disclaimer_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
 
 
-# In[49]:
+# In[ ]:
 
 
 #####################
@@ -374,7 +405,7 @@ impressum_modal = html.Div(
                             - Prof. Dr. Harald Bolt  
 
                             #### Vorsitzender des Aufsichtsrats:
-                            Ministerialdirektor Dr. Karl Eugen Huthmacher
+                            Ministerialdirektor Volker Rieke
 
                             #### Kontakt:
                             Telefon-Sammel-Nr. 02461 61-0  
@@ -387,7 +418,7 @@ impressum_modal = html.Div(
                     ]
                 ),
                 dbc.ModalFooter(
-                    dbc.Button("Schließen", id="impressum_modal_close", className="ml-auto")
+                   dbc.Button("Schließen", id="impressum_modal_close", className="ml-auto")
                 ),
             ],
         ),
@@ -398,14 +429,13 @@ impressum_modal = html.Div(
     [Input("impressum_modal_open", "n_clicks"), Input("impressum_modal_close", "n_clicks")],
     [State("impressum_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
 
 
-# In[50]:
+# In[ ]:
 
 
 #####################
@@ -706,18 +736,17 @@ Diese Datenschutzerklärung wurde durch den Datenschutzerklärungs-Generator von
     [Input("datenschutz_modal_open", "n_clicks"), Input("datenschutz_modal_close", "n_clicks")],
     [State("datenschutz_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, is_open):
     if n1 or n2:
         return not is_open
     return is_open
 
 
-# In[51]:
+# In[ ]:
 
 
 #####################
-# Header and Footer
+# Header and Footer (main)
 #####################
 # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/navbar/
 
@@ -732,7 +761,29 @@ navbar = dbc.NavbarSimple(
             dbc.Button(
                 "Fragen & Antworten",
                 color="primary",
-                href="https://jupyter-jsc.fz-juelich.de/nbviewer/github/neuroinfo-os/BSTIM-Covid19/blob/master/notebooks/FragenAntworten.ipynb"
+                href="/faq" #"https://jupyter-jsc.fz-juelich.de/nbviewer/github/neuroinfo-os/BSTIM-Covid19/blob/master/notebooks/FragenAntworten.ipynb"
+            )
+        ),
+        dbc.NavItem(
+            dbc.NavLink(
+                "Quellcode",
+                href="https://github.com/neuroinfo-os/BSTIM-Covid19",
+            )
+        ),
+    ])
+
+faq_navbar = dbc.NavbarSimple(
+    brand="Bayessches räumlich-zeitliches Interaktionsmodell für Covid-19",
+    brand_href="#",
+    color="dark",
+    fixed="top",
+    dark=True,
+    children=[
+        dbc.NavItem(
+            dbc.Button(
+                "Dashboard",
+                color="primary",
+                href="/" #"https://jupyter-jsc.fz-juelich.de/nbviewer/github/neuroinfo-os/BSTIM-Covid19/blob/master/notebooks/FragenAntworten.ipynb"
             )
         ),
         dbc.NavItem(
@@ -749,14 +800,14 @@ navbar_footer = dbc.NavbarSimple(
     color="light",
     #fixed="bottom",
     #sticky=True,
-    #dark=True,    
+    #dark=True,
     children=[
         dbc.NavItem(impressum_modal),
         dbc.NavItem(datenschutz_modal),
     ])
 
 
-# In[52]:
+# In[ ]:
 
 
 #####################
@@ -900,7 +951,7 @@ ikernel_inter3_modal = html.Div(
 )
 
 
-# In[53]:
+# In[ ]:
 
 
 #####################
@@ -919,10 +970,11 @@ left_date_tab1 = dbc.Card(
                     dcc.Loading(
                         id = "left_date_tab1_loading_graph", 
                         children=[html.Div(children=[
-                                    dcc.Graph(id='left_date_tab1_graph', figure={}),
+                                    dcc.Graph(id='left_date_tab1_graph', figure=init_mapfig_bstim, style={'width':'100%', 'height':'100%','display':'inline-block'}),
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'450px'},
                     ),
                 ]),
         ]),
@@ -973,6 +1025,7 @@ left_date_tab2 = dbc.Card(
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'450px'},
                     ),
                     dbc.Tooltip(
                         "Der Interaktionskernel schätzt ab um wie stark eine gemeldete Infektion eine Neuansteckung in den nächsten Tagen "
@@ -1065,29 +1118,13 @@ left_date_tab3 = dbc.Card(
                 id="left_date_tab3_img_div",
                 children=[
                     dcc.Loading(
-                        id = "left_date_tab3_loading_img", 
+                        id = "left_date_tab3_loading_graph", 
                         children=[html.Div(children=[
-                            html.Img(
-                                id="left_date_tab3_img",
-                                src=asset_url + "figures/" + init_date.strftime('%Y_%m_%d') + "/map.png",
-                                style={'width':'100%', 'height':'100%'},
-                            ),
+                                    dcc.Graph(id='left_date_tab3_graph', figure=init_mapfig_rki, style={'width':'100%', 'height':'100%','display':'inline-block'}),
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
-                    ),                      
-                    html.Div(
-                        id="left_date_tab3_txt",
-                        children=["left_date_tab3_txt"],
-                    ),
-                    dbc.Tooltip(
-                        "Die Infektionszahlen (Nowcast) pro Tag pro Landkreis und gewähltem Zeitfenster. "
-                        "Der angezeigte Wert entspricht dem Nowcast, also der Schätzung der Anzahl der tatsächlich Neuinfizierten. "
-                        "Diese Schätzung korrigiert die gemeldeten Zahlen, die aufgrund von Verzögerungen im Meldeprozess "
-                        "und einem unbekannten Erkrankungsdatum kleiner als die tatsächlichen Zahlen sein können, auf der Basis einer Vorhersage. ",
-                        target="left_date_tab3_img",
-                        style={"width": "200%"},
-                        placement="left",
+                        style={'hight':'450px'},
                     ),
                 ]),
         ]),
@@ -1098,14 +1135,13 @@ left_date_tab3 = dbc.Card(
     [Input("left_date_tab2_img_div", "n_clicks"), Input("left_date_tab2_modal_open", "n_clicks"), Input("left_date_tab2_modal_close", "n_clicks")],
     [State("left_date_tab2_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
     return is_open
 
 
-# In[54]:
+# In[ ]:
 
 
 #####################
@@ -1121,21 +1157,22 @@ left_date_controls = dbc.FormGroup(
             children=[
                 dcc.DatePickerSingle(
                     id='left_date-picker',
+                    style={'width':'100%'},
                     display_format='DD. MMM YYYY',
                     min_date_allowed=min_date,
                     max_date_allowed=max_date,
                     initial_visible_month=init_date,
-                    date=init_date,
+                    date=init_date +timedelta(days=deltadays),
                 ),
                 html.Div(
                     id='left_output-container-date-picker',
                     style={'display': 'none'},
-                    children=[(init_date -timedelta(days=deltadays)).strftime('%Y_%m_%d')],
+                    children=[(init_date +timedelta(days=deltadays)).strftime('%Y_%m_%d')],
                 ),
             ]),
         dbc.Label(
             id='left_date-label2',
-            children=["(auf Basis der Daten des vorherigen 3-Wochenfensters)"],
+            children=["(auf Basis der Daten des vorherigen 4-Wochenfensters)"],
         ),
     ])
 
@@ -1143,11 +1180,12 @@ left_date_controls = dbc.FormGroup(
 @app.callback(
      Output(component_id='left_output-container-date-picker', component_property='children'),
     [Input(component_id='left_date-picker', component_property='date')])
-@cache.memoize(timeout=cache_timeout)
 def update_left_date_picker(date):
     if date is not None:
         return get_assets_dir(date)
-    
+    else:
+        return init_assets_dir
+
 # Interactive Map
 @app.callback(
      Output(component_id='left_date_tab1_graph', component_property='figure'),
@@ -1156,34 +1194,41 @@ def update_left_date_picker(date):
 def update_left_date_tab1_map(date):
     if date is not None:
         assets_dir = get_assets_dir(date)
-        mapfig = create_map("assets/figures/" + assets_dir + "/map.csv")    
-        return mapfig
+        mapfig = create_map("assets/figures/" + assets_dir + "/map.csv", 'newInf100k')
+    else:
+        mapfig = create_map("assets/placeholders/map_empty.csv", 'newInf100k')
+    return mapfig
 
 # Interaction Kernel
 @app.callback(
     [Output(component_id='left_date_tab2_img', component_property='src'),
      Output(component_id='left_date_modal2_img', component_property='src')],
     [Input(component_id='left_date-picker', component_property='date')])
-@cache.memoize(timeout=cache_timeout)
 def update_left_date_tab2_img(date):
+    imgUrl=""
     if date is not None:
         assets_dir = get_assets_dir(date)
-        imgUrl = asset_url + "figures/" + assets_dir + "/interaction_kernel.png"
-        return imgUrl, imgUrl
+        imgUrl = "figures/" + assets_dir + "interaction_kernel.png"
+    if not os.path.isfile("assets/" + imgUrl): 
+        imgUrl = "placeholders/plot_not_found.png"
+    imgUrl = asset_url + imgUrl
+    return imgUrl, imgUrl
 
-# Static Kernel
+# Interactive Map - RKI
 @app.callback(
-     Output(component_id='left_date_tab3_img', component_property='src'),
+     Output(component_id='left_date_tab3_graph', component_property='figure'),
     [Input(component_id='left_date-picker', component_property='date')])
 @cache.memoize(timeout=cache_timeout)
-def update_left_date_tab3_img(date):
+def update_left_date_tab3_map(date):
     if date is not None:
         assets_dir = get_assets_dir(date)
-        imgUrl = asset_url + "figures/" + assets_dir + "/map.png"
-        return imgUrl
+        mapfig = create_map("assets/figures/" + assets_dir + "/map.csv", 'newInf100k_RKI')  
+    else:
+        mapfig = create_map("assets/placeholders/map_empty.csv", 'newInf100k')
+    return mapfig
 
 
-# In[55]:
+# In[ ]:
 
 
 #####################
@@ -1202,10 +1247,11 @@ right_date_tab1 = dbc.Card(
                     dcc.Loading(
                         id = "right_date_tab1_loading_graph", 
                         children=[html.Div(children=[
-                                    dcc.Graph(id='right_date_tab1_graph', figure={}),
+                                    dcc.Graph(id='right_date_tab1_graph', figure=init_mapfig_bstim, style={'width':'100%', 'height':'100%','display':'inline-block'}),
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'450px'},
                     ),
                 ]),
         ]),
@@ -1256,6 +1302,7 @@ right_date_tab2 = dbc.Card(
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'450px'},
                     ),                    
                     dbc.Tooltip(
                         "Der Interaktionskernel schätzt ab um wie stark eine gemeldete Infektion eine Neuansteckung in den nächsten Tagen "
@@ -1348,29 +1395,13 @@ right_date_tab3 = dbc.Card(
                 id="right_date_tab3_img_div",
                 children=[
                     dcc.Loading(
-                        id = "right_date_tab3_loading_img", 
+                        id = "right_date_tab3_loading_graph", 
                         children=[html.Div(children=[
-                            html.Img(
-                                id="right_date_tab3_img",
-                                src=asset_url + "figures/" + init_date.strftime('%Y_%m_%d') + "/map.png",
-                                style={'width':'100%', 'height':'100%'},
-                            ),
+                                    dcc.Graph(id='right_date_tab3_graph', figure=init_mapfig_rki, style={'width':'100%', 'height':'100%','display':'inline-block'}),
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
-                    ),                    
-                    dbc.Tooltip(
-                        "Die Infektionszahlen (Nowcast) pro Tag pro Landkreis und gewählten Zeitfenster. "
-                        "Der anzeigte Wert entspricht dem Nowcast, also der Schätzung der Anzahl der tatsächlich neuinfizierten. "
-                        "Diese Schätzung korrigiert die gemeldeten Zahlen, die aufgrund von Verzögerungen im Meldeprozess "
-                        "und einem unbekannten Erkrankungsdatum kleiner als die tatsächlichen Zahlen sein können, auf der Basis einer Vorhersage. ",
-                        target="right_date_tab3_img",
-                        style={"width": "200%"},
-                        placement="right",
-                    ),
-                    html.Div(
-                        id="right_date_tab3_txt",
-                        children=["right_date_tab3_txt"],
+                        style={'hight':'450px'},
                     ),
                 ]),
         ]),
@@ -1381,14 +1412,13 @@ right_date_tab3 = dbc.Card(
     [Input("right_date_tab2_img_div", "n_clicks"), Input("right_date_tab2_modal_open", "n_clicks"), Input("right_date_tab2_modal_close", "n_clicks")],
     [State("right_date_tab2_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
     return is_open
 
 
-# In[56]:
+# In[ ]:
 
 
 #####################
@@ -1399,7 +1429,6 @@ def toggle_modal(n1, n2, n3, is_open):
     [Input("left_date_tab2_ikernel1_div", "n_clicks"), Input("right_date_tab2_ikernel1_div", "n_clicks"), Input("ikernel_inter1_modal_close", "n_clicks")],
     [State("ikernel_inter1_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
@@ -1410,7 +1439,6 @@ def toggle_modal(n1, n2, n3, is_open):
     [Input("left_date_tab2_ikernel2_div", "n_clicks"), Input("right_date_tab2_ikernel2_div", "n_clicks"), Input("ikernel_inter2_modal_close", "n_clicks")],
     [State("ikernel_inter2_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
@@ -1421,14 +1449,13 @@ def toggle_modal(n1, n2, n3, is_open):
     [Input("left_date_tab2_ikernel3_div", "n_clicks"), Input("right_date_tab2_ikernel3_div", "n_clicks"), Input("ikernel_inter3_modal_close", "n_clicks")],
     [State("ikernel_inter3_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
     return is_open
 
 
-# In[57]:
+# In[ ]:
 
 
 #####################
@@ -1444,21 +1471,22 @@ right_date_controls = dbc.FormGroup(
             children=[
                 dcc.DatePickerSingle(
                     id='right_date-picker',
+                    style={'width':'100%'}, #150px'},
                     display_format='DD. MMM YYYY',
                     min_date_allowed=min_date,
                     max_date_allowed=max_date,
                     initial_visible_month=init_date,
-                    date=init_date,
+                    date=init_date +timedelta(days=deltadays),
                 ),
                 html.Div(
                     id='right_output-container-date-picker',
                     style={'display': 'none'},
-                    children=[init_date.strftime('%Y_%m_%d')],
+                    children=[(init_date +timedelta(days=deltadays)).strftime('%Y_%m_%d')],
                 ),
             ]),
         dbc.Label(
             id='right_date-label2',
-            children=["(auf Basis der Daten des vorherigen 3-Wochenfensters)"],
+            children=["(auf Basis der Daten des vorherigen 4-Wochenfensters)"],
         ),
     ])
 
@@ -1466,12 +1494,13 @@ right_date_controls = dbc.FormGroup(
 @app.callback(
      Output(component_id='right_output-container-date-picker', component_property='children'),
     [Input(component_id='right_date-picker', component_property='date')])
-@cache.memoize(timeout=cache_timeout)
 def update_right_date_picker(date):
     if date is not None:
         return get_assets_dir(date)
+    else:
+        return init_assets_dir
 
-# Interactive Map
+# Interactive Map - BSTIM
 @app.callback(
      Output(component_id='right_date_tab1_graph', component_property='figure'),
     [Input(component_id='right_date-picker', component_property='date')])
@@ -1479,34 +1508,41 @@ def update_right_date_picker(date):
 def update_right_date_tab1_map(date):
     if date is not None:
         assets_dir = get_assets_dir(date)
-        mapfig = create_map("assets/figures/" + assets_dir + "/map.csv")    
-        return mapfig
+        mapfig = create_map("assets/figures/" + assets_dir + "/map.csv", 'newInf100k')  
+    else:
+        mapfig = create_map("assets/placeholders/map_empty.csv", 'newInf100k')
+    return mapfig
     
 # Interaction Kernel
 @app.callback(
     [Output(component_id='right_date_tab2_img', component_property='src'),
      Output(component_id='right_date_modal2_img', component_property='src')],
     [Input(component_id='right_date-picker', component_property='date')])
-@cache.memoize(timeout=cache_timeout)
 def update_right_date_tab2_img(date):
+    imgUrl=""
     if date is not None:
         assets_dir = get_assets_dir(date)
-        imgUrl = asset_url + "figures/" + assets_dir + "/interaction_kernel.png"
-        return imgUrl, imgUrl
-    
-# Static Kernel
+        imgUrl = "figures/" + assets_dir + "interaction_kernel.png"
+    if not os.path.isfile("assets/" + imgUrl): 
+        imgUrl = "placeholders/plot_not_found.png"
+    imgUrl = asset_url + imgUrl
+    return imgUrl, imgUrl
+
+# Interactive Map - RKI
 @app.callback(
-     Output(component_id='right_date_tab3_img', component_property='src'),
+     Output(component_id='right_date_tab3_graph', component_property='figure'),
     [Input(component_id='right_date-picker', component_property='date')])
 @cache.memoize(timeout=cache_timeout)
-def update_right_date_tab3_img(date):
+def update_right_date_tab3_map(date):
     if date is not None:
         assets_dir = get_assets_dir(date)
-        imgUrl = asset_url + "figures/" + assets_dir + "/map.png"
-        return imgUrl
+        mapfig = create_map("assets/figures/" + assets_dir + "/map.csv", 'newInf100k_RKI')  
+    else:
+        mapfig = create_map("assets/placeholders/map_empty.csv", 'newInf100k')
+    return mapfig
 
 
-# In[58]:
+# In[ ]:
 
 
 #####################
@@ -1557,17 +1593,20 @@ left_pos_tab1 = dbc.Card(
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'340px'},
                     ),  
                     html.Div(
-                        id="left_pos_tab1_txt",
-                        children=["left_pos_tab1_txt"],
+                        dcc.Markdown(
+                            id="left_pos_tab1_txt",
+                            children=[""],
+                        )
                     ),
                     dbc.Tooltip(
                         "Analyse und Vorhersage der Infektionszahlen für den ausgewählten Landkreis. "
                         "Der Nowcast entspricht der Schätzung der realen aktuellen Neuinfektionen für den angegebenden Tag. "
                         "Diese Schätzung korrigiert die gemeldeten Zahlen, die aufgrund von Verzögerungen im Meldeprozess "
                         "und einem unbekannten Erkrankungsdatum kleiner als die tatsächlichen Zahlen sein können, auf der Basis einer Vorhersage. "
-                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 7 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
+                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 5 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
                         "Das geglättete Model korrigiert die Ergebnisse bezüglich eines Wochenrhythmusses bei den Meldeverzögerungen (siehe Erklärvideo). ",
                         target="left_pos_tab1_img",
                         style={"width": "600px"},
@@ -1581,7 +1620,6 @@ left_pos_tab1 = dbc.Card(
     [Input("left_pos_tab1_img_div", "n_clicks"), Input("left_pos_tab1_modal_open", "n_clicks"), Input("left_pos_tab1_modal_close", "n_clicks")],
     [State("left_pos_tab1_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
@@ -1634,17 +1672,20 @@ left_pos_tab2 = dbc.Card(
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'340px'},
                     ),                      
                     html.Div(
-                        id="left_pos_tab2_txt",
-                        children=["left_pos_tab2_txt"],
+                        dcc.Markdown(
+                            id="left_pos_tab2_txt",
+                            children=[""],
+                        )
                     ),
                     dbc.Tooltip(
                         "Analyse und Vorhersage der Infektionszahlen für den ausgewählten Landkreis. "
                         "Der Nowcast entspricht der Schätzung der realen aktuellen Neuinfektionen für den angegebenden Tag. "
                         "Diese Schätzung korrigiert die gemeldeten Zahlen, die aufgrund von Verzögerungen im Meldeprozess "
                         "und einem unbekannten Erkrankungsdatum kleiner als die tatsächlichen Zahlen sein können, auf der Basis einer Vorhersage. "
-                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 7 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
+                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 5 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
                         "Das geglättete Model korrigiert die Ergebnisse bezüglich eines Wochenrhythmusses bei den Meldeverzögerungen (siehe Erklärvideo). ",
                         target="left_pos_tab2_img",
                         style={"width": "200%"},
@@ -1658,14 +1699,13 @@ left_pos_tab2 = dbc.Card(
     [Input("left_pos_tab2_img_div", "n_clicks"), Input("left_pos_tab2_modal_open", "n_clicks"), Input("left_pos_tab2_modal_close", "n_clicks")],
     [State("left_pos_tab2_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
     return is_open
 
 
-# In[59]:
+# In[ ]:
 
 
 #####################
@@ -1694,7 +1734,6 @@ left_pos_controls = dbc.FormGroup(
 #    Output(component_id='left_output-container-pos-variable', component_property='children'),
 #    [Input(component_id='left_pos-variable', component_property='value'),
 #     Input(component_id='left_output-container-date-picker', component_property='children')])
-#@cache.memoize(timeout=cache_timeout)
 #def update_left_pos_variable(value, assets_dir):
 #    if value is not None:
 #        return asset_url + "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
@@ -1703,14 +1742,18 @@ left_pos_controls = dbc.FormGroup(
 @app.callback(
     Output(component_id='left_pos-variable', component_property='value'),
     # Output(component_id='left_date_tab1_txt', component_property='children')],
-    [Input(component_id='left_date_tab1_graph', component_property='clickData')]
+    [Input(component_id='left_date_tab1_graph', component_property='clickData'),
+     Input(component_id='left_date_tab3_graph', component_property='clickData')]
 )
-def update_left_date_tab1_mapclick(choro_click):
-    if choro_click is not None:
-        cid = choro_click['points'][0]['location']
+def update_left_date_mapclick(choro1_click, choro3_click):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        id_str = init_countyid
+    else:
+        cid = ctx.triggered[0]['value']['points'][0]['location']
         id_str = counties_metadf['cca'][cid]
-        return int(id_str) #, id_str
-    return init_countyid #, str(init_countyid)
+        #print("update_right_date1_mapclick - cid={}, id_str={}".format(cid,id_str))
+    return int(id_str) #, id_str
 
 # geglättet
 @app.callback(
@@ -1718,11 +1761,14 @@ def update_left_date_tab1_mapclick(choro_click):
      Output(component_id='left_pos_modal1_img', component_property='src')],
     [Input(component_id='left_pos-variable', component_property='value'),
      Input(component_id='left_output-container-date-picker', component_property='children')])
-@cache.memoize(timeout=cache_timeout)
 def update_left_pos_tab1_img(value, assets_dir):
+    imgUrl=""
     if value is not None:
-        imgUrl = asset_url + "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
-        return imgUrl, imgUrl
+        imgUrl = "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
+    if not os.path.isfile("assets/" + imgUrl): 
+        imgUrl = "placeholders/plot_not_found.png"
+    imgUrl = asset_url + imgUrl
+    return imgUrl, imgUrl
 
 # ungeglättet
 @app.callback(
@@ -1730,11 +1776,14 @@ def update_left_pos_tab1_img(value, assets_dir):
      Output(component_id='left_pos_modal2_img', component_property='src')],
     [Input(component_id='left_pos-variable', component_property='value'),
      Input(component_id='left_output-container-date-picker', component_property='children')])
-@cache.memoize(timeout=cache_timeout)
 def update_left_pos_tab2_img(value, assets_dir):
+    imgUrl=""
     if value is not None:
-        imgUrl = asset_url + "figures/" + assets_dir + "curve_{0:05d}.png".format(value)
-        return imgUrl, imgUrl
+        imgUrl = "figures/" + assets_dir + "curve_{0:05d}.png".format(value)
+    if not os.path.isfile("assets/" + imgUrl): 
+        imgUrl = "placeholders/plot_not_found.png"
+    imgUrl = asset_url + imgUrl
+    return imgUrl, imgUrl
 
 # print meta-information
 @app.callback(
@@ -1742,15 +1791,42 @@ def update_left_pos_tab2_img(value, assets_dir):
      Output(component_id='left_pos_tab2_txt', component_property='children')], 
     [Input(component_id='left_pos-variable', component_property='value'),
      Input(component_id='left_output-container-date-picker', component_property='children')])
-@cache.memoize(timeout=cache_timeout)
 def update_left_pos_txt(value, assets_dir):
+    msg = " "
     if value is not None:
-        mdat = pd.read_csv("./assets/figures/" + assets_dir + "/metadata.csv")
-        msg = mdat.loc[mdat['countyID'] == value]['probText'].to_string(index=False)
-        return msg, msg
+        try:
+            mdat = pd.read_csv("./assets/figures/" + assets_dir + "/metadata.csv")
+            msg = mdat.loc[mdat['countyID'] == value]['probText'].to_string(index=False)
+            try:
+                val = float(msg)
+                absVal = abs(val)
+                if val<0.0:
+                    if 95.0 < absVal <= 100.0:
+                        msg = 'Es gibt eine deutliche Tendenz von **fallenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **95%**.'
+                    elif 75.0 < absVal <= 95.0:
+                        msg = 'Es gibt eine Tendenz von **fallenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **75%**.'
+                    elif 50.0 < absVal <= 75.0:
+                        msg = 'Es gibt eine Tendenz von **fallenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **50%**.'
+                    else:
+                        msg = 'Die Infektionszahlen werden mit einer Wahrscheinlichkeit von **{:.1f}%** fallen.'.format(absVal)
+                else:
+                    if 95.0 < absVal <= 100.0:
+                        msg = 'Es gibt eine deutliche Tendenz von **steigenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **95%**.'
+                    elif 75.0 < absVal <= 95.0:
+                        msg = 'Es gibt eine Tendenz von **steigenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **75%**.'
+                    elif 50.0 < absVal <= 75.0:
+                        msg = 'Es gibt eine Tendenz von **steigenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **50%**.'
+                    else:
+                        msg = 'Die Infektionszahlen werden mit einer Wahrscheinlichkeit von **{:.1f}%** fallen.'.format(absVal)
+            except:
+                print("Exception in update_right_pos_txt")
+                pass
+        except:
+            pass
+    return msg, msg
 
 
-# In[60]:
+# In[ ]:
 
 
 #####################
@@ -1801,17 +1877,20 @@ right_pos_tab1 = dbc.Card(
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'340px'},
                     ),                    
                     html.Div(
-                        id="right_pos_tab1_txt",
-                        children=["right_pos_tab1_txt"],
+                        dcc.Markdown(
+                            id="right_pos_tab1_txt",
+                            children=[""],
+                        )
                     ),
                     dbc.Tooltip(
                         "Analyse und Vorhersage der Infektionszahlen für den ausgewählten Landkreis. "
                         "Der Nowcast entspricht der Schätzung der realen aktuellen Neuinfektionen für den angegebenden Tag. "
                         "Diese Schätzung korrigiert die gemeldeten Zahlen, die aufgrund von Verzögerungen im Meldeprozess "
                         "und einem unbekannten Erkrankungsdatum kleiner als die tatsächlichen Zahlen sein können, auf der Basis einer Vorhersage. "
-                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 7 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
+                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 5 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
                         "Das geglättete Model korrigiert die Ergebnisse bezüglich eines Wochenrhythmusses bei den Meldeverzögerungen (siehe Erklärvideo). ",
                         target="right_pos_tab1_img",
                         style={"width": "200%"},
@@ -1825,7 +1904,6 @@ right_pos_tab1 = dbc.Card(
     [Input("right_pos_tab1_img_div", "n_clicks"), Input("right_pos_tab1_modal_open", "n_clicks"), Input("right_pos_tab1_modal_close", "n_clicks")],
     [State("right_pos_tab1_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
@@ -1878,17 +1956,20 @@ right_pos_tab2 = dbc.Card(
                         ])],
                         type="circle", # 'graph', 'cube', 'circle', 'dot', 'default'
                         color="#343A40",
+                        style={'hight':'340px'},
                     ),    
                     html.Div(
-                        id="right_pos_tab2_txt",
-                        children=["right_pos_tab2_txt"],
+                        dcc.Markdown(
+                            id="right_pos_tab2_txt",
+                            children=[""],
+                        )
                     ),
                     dbc.Tooltip(
                         "Analyse und Vorhersage der Infektionszahlen für den ausgewählten Landkreis. "
                         "Der Nowcast entspricht der Schätzung der realen aktuellen Neuinfektionen für den angegebenden Tag. "
                         "Diese Schätzung korrigiert die gemeldeten Zahlen, die aufgrund von Verzögerungen im Meldeprozess "
                         "und einem unbekannten Erkrankungsdatum kleiner als die tatsächlichen Zahlen sein können, auf der Basis einer Vorhersage. "
-                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 7 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
+                        "Die Vorhersage nutzt das gleiche Modell um den Verlauf der kommenden 5 Tage, für die noch keine Zahlen vorliegen, vorherzusagen. "
                         "Das geglättete Model korrigiert die Ergebnisse bezüglich eines Wochenrhythmusses bei den Meldeverzögerungen (siehe Erklärvideo). ",
                         target="right_pos_tab2_img",
                         style={"width": "200%"},
@@ -1902,14 +1983,13 @@ right_pos_tab2 = dbc.Card(
     [Input("right_pos_tab2_img", "n_clicks"), Input("right_pos_tab2_modal_open", "n_clicks"), Input("right_pos_tab2_modal_close", "n_clicks")],
     [State("right_pos_tab2_modal", "is_open")],
 )
-@cache.memoize(timeout=cache_timeout)
 def toggle_modal(n1, n2, n3, is_open):
     if n1 or n2 or n3:
         return not is_open
     return is_open
 
 
-# In[61]:
+# In[ ]:
 
 
 #####################
@@ -1938,7 +2018,6 @@ right_pos_controls = dbc.FormGroup(
 #    Output(component_id='right_output-container-pos-variable', component_property='children'),
 #    [Input(component_id='right_pos-variable', component_property='value'),
 #     Input(component_id='right_output-container-date-picker', component_property='children')])
-#@cache.memoize(timeout=cache_timeout)
 #def update_right_pos_variable(value, assets_dir):
 #    if value is not None:
 #        return asset_url + "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
@@ -1947,14 +2026,18 @@ right_pos_controls = dbc.FormGroup(
 @app.callback(
     Output(component_id='right_pos-variable', component_property='value'),
     # Output(component_id='right_date_tab1_txt', component_property='children')],
-    [Input(component_id='right_date_tab1_graph', component_property='clickData')]
+    [Input(component_id='right_date_tab1_graph', component_property='clickData'),
+     Input(component_id='right_date_tab3_graph', component_property='clickData')]
 )
-def update_right_date_tab1_mapclick(choro_click):
-    if choro_click is not None:
-        cid = choro_click['points'][0]['location']
+def update_right_date_mapclick(choro1_click, choro3_click):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        id_str = init_countyid
+    else:
+        cid = ctx.triggered[0]['value']['points'][0]['location']
         id_str = counties_metadf['cca'][cid]
-        return int(id_str) #, id_str
-    return init_countyid #, str(init_countyid)
+        #print("update_right_date1_mapclick - cid={}, id_str={}".format(cid,id_str))
+    return int(id_str) #, id_str
 
 # geglättet
 @app.callback(
@@ -1962,11 +2045,14 @@ def update_right_date_tab1_mapclick(choro_click):
      Output(component_id='right_pos_modal1_img', component_property='src')],
     [Input(component_id='right_pos-variable', component_property='value'),
      Input(component_id='right_output-container-date-picker', component_property='children')])
-@cache.memoize(timeout=cache_timeout)
 def update_right_pos_tab1_img(value, assets_dir):
+    imgUrl=""
     if value is not None:
-        imgUrl = asset_url + "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
-        return imgUrl, imgUrl
+        imgUrl = "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
+    if not os.path.isfile("assets/" + imgUrl): 
+        imgUrl = "placeholders/plot_not_found.png"
+    imgUrl = asset_url + imgUrl
+    return imgUrl, imgUrl
     
 # ungeglättet
 @app.callback(
@@ -1974,11 +2060,14 @@ def update_right_pos_tab1_img(value, assets_dir):
      Output(component_id='right_pos_modal2_img', component_property='src')],
     [Input(component_id='right_pos-variable', component_property='value'),
      Input(component_id='right_output-container-date-picker', component_property='children')])
-@cache.memoize(timeout=cache_timeout)
 def update_right_pos_tab2_img(value, assets_dir):
+    imgUrl=""
     if value is not None:
-        imgUrl = asset_url + "figures/" + assets_dir + "curve_{0:05d}.png".format(value)
-        return imgUrl, imgUrl
+        imgUrl = "figures/" + assets_dir + "curve_{0:05d}.png".format(value)
+    if not os.path.isfile("assets/" + imgUrl): 
+        imgUrl = "placeholders/plot_not_found.png"
+    imgUrl = asset_url + imgUrl
+    return imgUrl, imgUrl
 
 # print meta-information
 @app.callback(
@@ -1986,12 +2075,39 @@ def update_right_pos_tab2_img(value, assets_dir):
      Output(component_id='right_pos_tab2_txt', component_property='children')], 
     [Input(component_id='right_pos-variable', component_property='value'),
      Input(component_id='right_output-container-date-picker', component_property='children')])
-@cache.memoize(timeout=cache_timeout)
 def update_right_pos_txt(value, assets_dir):
+    msg = " "
     if value is not None:
-        mdat = pd.read_csv("./assets/figures/" + assets_dir + "/metadata.csv")
-        msg = mdat.loc[mdat['countyID'] == value]['probText'].to_string(index=False)
-        return msg, msg
+        try:
+            mdat = pd.read_csv("./assets/figures/" + assets_dir + "/metadata.csv")
+            msg = mdat.loc[mdat['countyID'] == value]['probText'].to_string(index=False)
+            try:
+                val = float(msg)
+                absVal = abs(val)
+                if val<0.0:
+                    if 95.0 < absVal <= 100.0:
+                        msg = 'Es gibt eine deutliche Tendenz von **fallenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **95%**.'
+                    elif 75.0 < absVal <= 95.0:
+                        msg = 'Es gibt eine Tendenz von **fallenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **75%**.'
+                    elif 50.0 < absVal <= 75.0:
+                        msg = 'Es gibt eine Tendenz von **fallenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **50%**.'
+                    else:
+                        msg = 'Die Infektionszahlen werden mit einer Wahrscheinlichkeit von **{:.1f}%** fallen.'.format(absVal)
+                else:
+                    if 95.0 < absVal <= 100.0:
+                        msg = 'Es gibt eine deutliche Tendenz von **steigenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **95%**.'
+                    elif 75.0 < absVal <= 95.0:
+                        msg = 'Es gibt eine Tendenz von **steigenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **75%**.'
+                    elif 50.0 < absVal <= 75.0:
+                        msg = 'Es gibt eine Tendenz von **steigenden** Infektionszahlen mit einer Wahrscheinlichkeit von grösser **50%**.'
+                    else:
+                        msg = 'Die Infektionszahlen werden mit einer Wahrscheinlichkeit von **{:.1f}%** fallen.'.format(absVal)
+            except:
+                print("Exception in update_right_pos_txt")
+                pass
+        except:
+            pass
+    return msg, msg
 
 
 # #### Define the main body of the webpage  
@@ -1999,7 +2115,7 @@ def update_right_pos_txt(value, assets_dir):
 # Layout in Bootstrap is controlled using the grid system.
 # The Bootstrap grid has **twelve** columns, and **five** responsive tiers (allowing you to specify different behaviours on different screen sizes, see below).
 
-# In[62]:
+# In[ ]:
 
 
 #####################
@@ -2007,7 +2123,7 @@ def update_right_pos_txt(value, assets_dir):
 #####################
 tab_height = '5vh'
 body_layout = dbc.Container(
-    style={"marginTop": 100},
+    style={"marginTop": 100, "marginBottom": 20},
     #fluid=True,
     children=[
         
@@ -2037,7 +2153,7 @@ body_layout = dbc.Container(
                     width=4,
                     children=[
                         html.Img(
-                            src='https://www.ikw.uni-osnabrueck.de/fileadmin/templates_global/public/img/header_logo.gif',
+                            src=asset_url + 'uniosnab-logo.png',
                             height='48', # width='500',
                             style={
                                 'display':'block',
@@ -2050,7 +2166,7 @@ body_layout = dbc.Container(
                     width=4,
                     children=[
  #                       html.Img(
- #                           src='https://www.rki.de/SiteGlobals/StyleBundles/Bilder/Farbschema_A/logo_a.jpg?__blob=normal&v=7',
+ #                           src=asset_url + 'rki-logo.png', #'https://www.rki.de/SiteGlobals/StyleBundles/Bilder/Farbschema_A/logo_a.jpg?__blob=normal&v=7',
  #                           height='48', # width='500',
  #                           style={
  #                               'display':'block',
@@ -2063,7 +2179,7 @@ body_layout = dbc.Container(
                     width=4,
                     children=[
                         html.Img(
-                            src='https://www.vi-hps.org/cms/upload/logos/full/jsc-logo.png',
+                            src=asset_url + 'jsc-logo.png',
                             height='48', # width='500',
                             style={
                                 'display':'block',
@@ -2105,10 +2221,19 @@ body_layout = dbc.Container(
                             children=[
                                 dash_player.DashPlayer(
                                     id='video-player',
-                                    url='https://youtu.be/8-AfYeosBW8',
+                                    url='https://youtu.be/0jvH3nkjR9I',
                                     controls=True,
                                     width='100%'
                                 ),
+                                dcc.Markdown(
+                                    f"""
+                                    Das Video ist unter folgendem Link auch unter YouTube verfügbar:  
+                                    ["BSTIM Covid-19 Model zur Analyse der Ausbreitung der Infektion"](https://youtu.be/0jvH3nkjR9I)
+                                    """,
+                                    style={
+                                       'margin': '5% 0% 0% 0%' # top, right, bottom, left
+                                    },
+                                ),                              
                             ]), 
                     ]),
             ]),
@@ -2157,9 +2282,9 @@ body_layout = dbc.Container(
                                             id="left_date-card-tabs",
                                             active_tab="tab-0",                                            
                                             children=[
-                                                dbc.Tab(left_date_tab1, label="Neuinfektionen",     style={'padding': '0', 'height': '450px'}),
-                                                dbc.Tab(left_date_tab2, label="Interaktionskernel", style={'padding': '0', 'height': '450px'}),
-                                                dbc.Tab(left_date_tab3, label="Statische Karte",    style={'padding': '0', 'height': '450px'}),                                                
+                                                dbc.Tab(left_date_tab3, label="Meldedaten RKI",     style={'padding': '0', 'height': '450px'}),
+                                                dbc.Tab(left_date_tab1, label="Nowcast BSTIM",      style={'padding': '0', 'height': '450px'}),
+                                                dbc.Tab(left_date_tab2, label="Interaktionskernel", style={'padding': '0', 'height': '450px'}),                                             
                                             ]),
                                     
                                         html.P(
@@ -2170,7 +2295,7 @@ body_layout = dbc.Container(
                                 # --- Ortsangabe (left) ---
                                         dbc.Card(
                                             style={
-                                                'margin': '0% 0% 0% 0%', # top, right, bottom, left
+                                                'margin': '0% 0% 0% 0%', # top, right, bottom, leftleft
                                                 'padding': '0',
                                             },                                 
                                             children=[
@@ -2184,8 +2309,8 @@ body_layout = dbc.Container(
                                                             id="left_pos-card-tabs",
                                                             active_tab="tab-0",                                                   
                                                             children=[
-                                                                dbc.Tab(left_pos_tab1, label="geglättet",    style={'padding': '0', 'height': '300px'}),
-                                                                dbc.Tab(left_pos_tab2, label="ungeglättet",  style={'padding': '0', 'height': '300px'}),
+                                                                dbc.Tab(left_pos_tab1, label="geglättet",    style={'padding': '0', 'height': '340px'}),
+                                                                dbc.Tab(left_pos_tab2, label="ungeglättet",  style={'padding': '0', 'height': '340px'}),
                                                             ]),
 
                                                         html.P(
@@ -2220,15 +2345,16 @@ body_layout = dbc.Container(
                                             id="right_date-card-tabs",
                                             active_tab="tab-0",
                                             children=[
-                                                dbc.Tab(right_date_tab1, label="Neuinfektionen",     style={'padding': '0', 'height': '450px'}),
+                                                dbc.Tab(right_date_tab3, label="Meldedaten RKI",     style={'padding': '0', 'height': '450px'}),
+                                                dbc.Tab(right_date_tab1, label="Nowcast BSTIM",      style={'padding': '0', 'height': '450px'}),
                                                 dbc.Tab(right_date_tab2, label="Interaktionskernel", style={'padding': '0', 'height': '450px'}),
-                                                dbc.Tab(right_date_tab3, label="Statische Karte",    style={'padding': '0', 'height': '450px'}),
                                             ]),
                                     
                                         html.P(
                                             id="right_pos-card-separator",
                                             className="card-text",
                                         ),
+                                        html.P(id='right_pos-card-hidden', style={'display':'none'}, children=["init"]),
                                         
                                 # --- Ortsangabe (left) ---
                                         dbc.Card(
@@ -2247,8 +2373,8 @@ body_layout = dbc.Container(
                                                             id="right_pos-card-tabs",
                                                             active_tab="tab-0",                                                   
                                                             children=[
-                                                                dbc.Tab(right_pos_tab1, label="geglättet",    style={'padding': '0', 'height': '300px'}),
-                                                                dbc.Tab(right_pos_tab2, label="ungeglättet",  style={'padding': '0', 'height': '300px'}),
+                                                                dbc.Tab(right_pos_tab1, label="geglättet",    style={'padding': '0', 'height': '340px'}),
+                                                                dbc.Tab(right_pos_tab2, label="ungeglättet",  style={'padding': '0', 'height': '340px'}),
                                                             ]),
 
                                                         html.P(
@@ -2263,12 +2389,218 @@ body_layout = dbc.Container(
             ]),
     ])
 
-app.layout = html.Div([navbar, body_layout, navbar_footer])
+# Note that if the container itself is resizable, the graph will not be replotted/resized.
+# There isn’t a reliable way to tell if a graph’s container has changed size in JavaScript yet, so we’re just checking if the window is resized.
+# We have to call a synthetic resize event to ensure, the graph is informed.
+# Solution found here: https://community.plotly.com/t/update-div-size-with-graph-in-it/22671
+app.clientside_callback(
+    """
+    function syntheticResize() {
+        var evt = window.document.createEvent('UIEvents');
+        evt.initUIEvent('resize', true, false, window, 0);
+        window.dispatchEvent(evt);
+        return "updated";
+    }
+    """,
+    Output('right_pos-card-hidden', 'children'),
+    [Input('left_date-card-tabs', 'active_tab'),
+     Input('right_date-card-tabs', 'active_tab')]
+)
+
+
+# In[ ]:
+
+
+#####################
+# Fragen & Anworten Structure
+#####################
+faq_body_layout = dbc.Container(
+    style={"marginTop": 100, "marginBottom": 20},
+    #fluid=True,
+    children=[
+        
+        #####################
+        # Introduction
+        #####################
+        
+        dbc.Row(
+            children=[
+                dbc.Col(
+                    style={
+                        "marginBottom": 10,
+                        "width": 12,
+                    },                    
+                    children=[
+                        dcc.Markdown(
+                            f"""
+                            #####  **Ein Gemeinschaftsprojekt der Arbeitsgruppe [Neuroinformatik an der Universität Osnabrück](https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics/people/prof_dr_gordon_pipa.html)**  
+                            #####  **und des [Jülich Supercomputing Centre](https://www.fz-juelich.de/jsc), auf Basis der Daten des [RKI](https://www.rki.de/DE/Content/Infekt/IfSG/Signale/Projekte/Signale_Projekte_node.html;jsessionid=C61DE534E8208B0D69BEAD299FC753F9.internet091)**
+                            """
+                        ),
+                    ]),                
+            ]),
+        dbc.Row(
+            children=[
+                dbc.Col(
+                    width=4,
+                    children=[
+                        html.Img(
+                            src=asset_url + 'uniosnab-logo.png',
+                            height='48', # width='500',
+                            style={
+                                'display':'block',
+                                'margin-left': 'auto',
+                                'margin-right': 'auto'
+                            },
+                        ),
+                    ]),
+                dbc.Col(
+                    width=4,
+                    children=[
+ #                       html.Img(
+ #                           src=asset_url + 'rki-logo.png', #'https://www.rki.de/SiteGlobals/StyleBundles/Bilder/Farbschema_A/logo_a.jpg?__blob=normal&v=7',
+ #                           height='48', # width='500',
+ #                           style={
+ #                               'display':'block',
+ #                               'margin-left': 'auto',
+ #                               'margin-right': 'auto'
+ #                           },
+ #                       ),
+                    ]),                
+                dbc.Col(
+                    width=4,
+                    children=[
+                        html.Img(
+                            src=asset_url + 'jsc-logo.png',
+                            height='48', # width='500',
+                            style={
+                                'display':'block',
+                                'margin-left': 'auto',
+                                'margin-right': 'auto'
+                            },
+                        ),
+                    ]),
+            ]),
+        dbc.Row(
+            style={ "marginTop": 30 },
+            children=[
+                dcc.Markdown(
+                    f"""
+                    ------------------------
+                    ### Fragen & Antworten
+                    ##### Bayessches räumlich-zeitliches Interaktionsmodell für Covid-19                   
+                    ------------------------
+
+                    #### Was ist ein Nowcast?
+                    Aufgrund von verschiedenen Verzögerungen in der Erfassung von Infektionen entsprechen die aktuellen Meldezahlen nicht den tatsächlichen des heutigen Tages.
+                    Das Nowcasting schätzt wie viele Fälle noch nicht berücksichtigt wurden und korrigiert Zahlen so, dass sie möglichst nah an den echten Zahlen sind.
+                    Für weitere Informationen siehe das [FAQ des Robert Koch-Instituts](https://www.rki.de/SharedDocs/FAQ/NCOV2019/gesamt.html) und den [Erklärfilm](https://youtu.be/8-AfYeosBW8) .
+
+                    ------------------------
+
+                    #### Woher kommen die Daten?
+                    Die Zahlen der Positiv-Tests beziehen wir vom offiziellen [Dashboard des RKIs](https://experience.arcgis.com/experience/478220a4c454480e823b17327b2bf1d4), bzw. dem dahinterliegenden ArcGIS-System.
+                    Eine Zusammenfassung dieser Zahlen wird auch im [Wochenbericht des RKI](https://ars.rki.de/Content/COVID19/Main.aspx) veröffentlicht. 
+
+                    ------------------------
+
+                    #### Worin unterscheidet sich diese Analyse von anderen Vorhersagen?
+                    Dieses Modell modelliert nicht nur den wahrscheinlichsten Verlauf, sondern zeigt eine Vielzahl von mit den Daten kompatiblen Verläufen und berechnet deren Wahrscheinlichkeit (Bayesian Analyse, siehe auch [Konfidenzintervall](https://de.wikipedia.org/wiki/Konfidenzintervall)).
+                    Dies erlaubt es die Wahrscheinlichkeit für eine Zu- oder Abnahme zu bestimmen, und zudem auch seltene aber eventuell extreme Vorhersagen in die Bewertung einfließen zu lassen.
+
+                    ------------------------
+
+                    #### Was ist ein Konfidenzintervall?
+                    Ein Konfidenzintervall gibt an wie groß der Bereich der Modell-Entwicklung ist, der mit einer bestimmten Wahrscheinlichkeit vorhergesagt wird.
+                    In unserem Fall haben wir für die Vorhersage zwei Konfidenzintervalle genutzt, die wie folgt interpretiert werden können. 
+                    - 25%-75% Quantil: Dieses dunkelgrüne/-orange Intervall beinhaltet 50% der Vorhersagen.
+                        Das heißt man kann erwarten, dass für eine Vorhersage die echten zukünftigen Daten mit einer Wahrscheinlichkeit von 50% in dem dunkelgrünen/-orangen Intervall liegen. 
+                    - 5%-95% Quantil: Dieses hellgrüne/-orange Intervall beinhaltet 90% der Vorhersagen.
+                        Das heißt man kann erwarten, dass für eine Vorhersage die echten zukünftigen Daten mit einer Wahrscheinlichkeit von 90 % in dem hellgrünen/-orangen Intervall liegen. 
+
+                    ------------------------
+
+                    #### Was ist der Interaktionskernel?
+                    Der Interaktionskernel schätzt ab um wie stark eine gemeldete Infektion eine Neuansteckung in den nächsten Tagen in einem Umkreis von bis zu 50km beeinflusst.
+                    Diese Interaktion ist ein zusätzlicher Faktor der den Trend in einem Landkreis verstärkt oder abschwächt.
+                    Eine warme Farbe indiziert, dass eine Covid-19 Meldung eine erhöhte Wahrscheinlichkeit einer Neuinfektion im Verhältnis zum Trend zur Folge hat.
+                    Eine starke Farben in der Nähe kleiner Radien bedeutet, dass das Infektionsgeschehen vor allem Auswirkungen in der direkten Nähe der gemeldeten Fälle zur Folge hat.
+                    Die Interaktion basiert auf einer Schätzung der Bevölkerungsdichte und der Form der Landkreise.
+                    Daten zu den Wohnorten der Infizierten werden in dem Model nicht genutzt.
+                    Alle hier genutzten Daten sind vollständig anonymisiert (siehe Erklärvideo).
+                    Bei der Interpretation der Interaktionskernel ist dies zu berücksichtigen, und wir weisen darauf hin, dass dies nur eine Schätzung ist die von der Realität abweichen kann.
+
+                    ------------------------
+
+                    #### Nach welchen Regeln werden die Farben des Interaktionskernels gewählt?
+                    Die Farben des Interaktionskernel geben die Stärke des lokalen und zeitlichen Einflusses der Umgebung an.
+                    Die Farben wurden so gewählt, dass starke Farben den größten Effekten seit dem Beginn der Analyse entsprechen.
+                    Schwache Farben indizieren, dass der Effekt deutlich kleiner ist. 
+
+                    ------------------------
+
+                    #### Welche Schwächen hat die Methode?
+                    Alle hier präsentierten Ergebnisse basieren auf statistischen Methoden und bilden damit nicht das tatsächliche Geschehen ab, sondern Schätzungen, die von der wirklichen Situation abweichen können.
+                    Dies ist bei der Interpretation der Ergebnisse zu berücksichtigen.
+                    Die hier präsentierten Forschungsergebnisse basieren auf einer neuen Methodik, die bisher nicht für COVID-19 sondern für Campylobacteriosis-, Rotavirus- und Borreliose-Infektionen eingesetzt wurde (siehe Veröffentlichung).
+                    Die Validierung der Ergebnisse für COVID-19 wird mit der wachsenden Menge an Daten in den kommenden Monaten fortgeführt. 
+
+                    ------------------------
+
+                    #### Was ist das geglättete und ungeglättete Modell?
+                    Die Daten des RKI zeigen eine Modulation im Wochenrhythmus, mit einer typischerweise niedrigeren Rate an Neuinfektionen am Wochenende.
+                    Die Modulation lässt sich durch systematische Verzögerungen im Meldeprozess erklären.
+                    Um die wirklichen Fallzahlen zu schätzen, nutzen wir ein Modell, welches diese Modulation im Wochenrhythmus korrigiert.
+                    Diese korrigierte Version entspricht den geglätteten Daten und dem wahrscheinlichsten wirklichen Infektionsgeschehen. 
+                    Um die Modulation zu korrigieren, verfolgen wir den Ansatz, den Wochenrhythmus zunächst im Modell zu beschreiben und anschließend diesen Teil aus dem Modell zur Vorhersage zu entfernen.
+                    Eine Alternative zu unserem Verfahren wäre es, die Daten zunächst zu filtern.
+                    Im Vergleich bietet das von uns eingesetzte Model die Möglichkeit, die Güte der Beschreibung der Daten sowohl für die geglätteten als auch ungeglätteten Daten durchzuführen und so auch die Qualität der Glättung selbst zu bestimmen. 
+
+                    ------------------------
+
+                    #### Wer hat zu diesem Modell beigetragen?
+                    - Luke Effenberger (Uni Osnabrück) (Umsetzung, Daten Analyse und Konzeption, Darstellung der Ergebnisse)
+                    - [Jens Henrik Göbbert](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/goebbert_j_h.html) (Jülich Supercomputing Centre) (Umsetzung und Konzeption der Webapplikation sowie des wissenschaftlichen Rechnens) 
+                    - [Dr. Kai Krajsek](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/krajsek_k.html) (Jülich Supercomputing Centre) (Performance-Analyse und -Optimierung durch Nutzung von GPU) 
+                    - [Tim Kreuzer](https://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/kreuzer_t.html) (Jülich Supercomputing Centre) (Infrastruktur für das wissenschaftliche Rechens, Webapplikation, Automatisierung der Rechnungen) 
+                    - [Prof. Dr. Gordon Pipa](https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics/people/prof_dr_gordon_pipa.html) (Uni Osnabrück) (Konzeption und wissenschaftliche Leitung)
+                    - [Pascal Nieters](https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics/people/msc_pascal_nieters.html) (Uni Osnabrück) (Umsetzung, Daten Analyse und Konzeption, Darstellung der Ergebnisse)
+                    - Dr. Daniel Rohe (Jülich Supercomputing Centre) (Organisation und Diskussion)
+                    """
+                ),
+            ],
+        ),
+    ],
+)  
+
+
+# In[ ]:
+
+
+main_page = html.Div(children=[
+        html.P('4.4', id='version', style={'display':'none'}),
+        navbar, body_layout, navbar_footer
+    ])
+faq_page  = html.Div(children=[faq_navbar, faq_body_layout, navbar_footer])
+
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
+])
+
+# Update the visible page
+@app.callback(dash.dependencies.Output('page-content', 'children'),
+              [dash.dependencies.Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/faq':
+        return faq_page
+    else:
+        return main_page
 
 
 # #### Start the app
 
-# In[63]:
+# In[ ]:
 
 
 if __name__ == "__main__":
