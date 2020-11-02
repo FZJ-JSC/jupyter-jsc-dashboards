@@ -133,17 +133,16 @@ def update_layout(fig, fixedrange=False,
     x_data = fig.data[-1]['x']
     x_labels = []
     # Create x-axis labels
-    for date in x_data:
-        date = datetime.strptime(date, '%Y-%m-%d')
-        # Only create label for mondays
-        if date.weekday() == 0:
+    for i, date in enumerate(x_data):
+        if i % 5 == 0:
+            date = datetime.strptime(date, '%Y-%m-%d')
             x_labels.append(date.strftime('%d.%m.%Y'))
         else:
             x_labels.append('')
-    for i in [-10, -5, -1]:
+    for i in [-10, -6, -1]:
         # Reformat date string
         date = datetime.strptime(x_data[i], '%Y-%m-%d').strftime('%d.%m.%Y<br>%A')
-        if i == -5: # Forecast date with weekday in red
+        if i == -6: # Day before forecast date: with weekday and red
             x_labels[i] = "<span style='color:red'><b>" + date + "</b></span>"
         else: # Nowcast and last date with weekday
             x_labels[i] = "<b>" + date + "</b>"
