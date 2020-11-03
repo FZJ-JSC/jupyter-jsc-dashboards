@@ -1634,7 +1634,7 @@ left_pos_tab2_modal = html.Div(
             id="left_pos_tab2_modal",
             size="xl",
             children=[
-                dbc.ModalHeader("geglättet"),
+                dbc.ModalHeader("ungeglättet"),
                 dbc.ModalBody(
                     children=[
                         html.Img(
@@ -1918,7 +1918,7 @@ right_pos_tab2_modal = html.Div(
             id="right_pos_tab2_modal",
             size="xl",
             children=[
-                dbc.ModalHeader("geglättet"),
+                dbc.ModalHeader("ungeglättet"),
                 dbc.ModalBody(
                     children=[
                         html.Img(
@@ -2143,6 +2143,9 @@ body_layout = dbc.Container(
                             f"""
                             #####  **Ein Gemeinschaftsprojekt der Arbeitsgruppe [Neuroinformatik an der Universität Osnabrück](https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics/people/prof_dr_gordon_pipa.html)**  
                             #####  **und des [Jülich Supercomputing Centre](https://www.fz-juelich.de/jsc), auf Basis der Daten des [RKI](https://www.rki.de/DE/Content/Infekt/IfSG/Signale/Projekte/Signale_Projekte_node.html;jsessionid=C61DE534E8208B0D69BEAD299FC753F9.internet091)**
+                            #####     
+                            #####  **Aufgrund von Verzögerungen bei der Bereitstellung der Daten durch das RKI kommt es in den letzten Tagen zu Verzögerungen bei den Vorhersagen.** 
+                            #####    
                             """
                         ),
                     ]),                
