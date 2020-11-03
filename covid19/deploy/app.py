@@ -82,7 +82,7 @@ app = dash.Dash(__name__,
 app.title = 'Covid-19-Interaktionsmodell'
 
 # cache_dir = "./cache"
-chache_dir = "/app/cache"
+cache_dir = "/app/cache"
 Path(cache_dir).mkdir(parents=True, exist_ok=True)
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
