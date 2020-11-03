@@ -82,7 +82,7 @@ app = dash.Dash(__name__,
 app.title = 'Covid-19-Interaktionsmodell'
 
 # cache_dir = "./cache"
-chache_dir = "/app/cache"
+cache_dir = "/app/cache"
 Path(cache_dir).mkdir(parents=True, exist_ok=True)
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
@@ -2714,7 +2714,8 @@ def display_page(pathname):
 # In[28]:
 
 
-app.run_server(mode="jupyterlab", debug=True) #,port=8052,debug=True)
+if __name__ == "__main__":
+    app.run_server(debug=True) #,port=8052,debug=True)
 # mode="jupyterlab" -> will open the app in a tab in JupyterLab
 # mode="inline"     -> will open the app below this cell
 # mode="external"   -> will displays a URL that you can click on to open the app in a browser tab

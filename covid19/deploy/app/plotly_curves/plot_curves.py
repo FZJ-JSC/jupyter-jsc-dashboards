@@ -4,7 +4,7 @@ import locale
 from datetime import datetime
 
 
-locale.setlocale(locale.LC_TIME, "de_DE")
+locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
 
 column_dict_raw = {
     'mean': {
