@@ -4,7 +4,7 @@ import locale
 from datetime import datetime
 
 
-locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
+locale.setlocale(locale.LC_TIME, "de_DE")
 
 column_dict_raw = {
     'mean': {
@@ -64,8 +64,37 @@ column_dict_trend = {
     }
 }
 
+column_dict_7days = {
+    'mean': {
+        'column': 'Trend 7Week Prediction Mean100k',
+        'color': 'rgb(0,100,80)',
+    },
+    'q5': {
+        'column': 'Trend 7Week Prediction Q5',
+        'color': 'rgb(214,221,198)',
+    },
+    'q25': {
+        'column': 'Trend 7Week Prediction Q25',
+        'color': 'rgb(190,208,150)',
+    },
+    'q75': {
+        'column': 'Trend 7Week Prediction Q75',
+        'color': 'rgb(190,208,150)',
+    },
+    'q95': {
+        'column': 'Trend 7Week Prediction Q95',
+        'color': 'rgb(214,221,198)',
+    },
+    'q5q95': {
+        'fill_color': 'rgba(214,221,198,0.5)',
+    },
+    'q25q75': {
+        'fill_color': 'rgba(190,208,150,0.5)',
+    }
+}
 
-def create_figure_from_df(df, column_dict):
+
+def create_figure_from_df(df, column_dict, rki=True):
     # Create figure
     fig = go.Figure()
     # Date column of df is the x data
@@ -113,23 +142,28 @@ def create_figure_from_df(df, column_dict):
         line_color=column_dict['mean']['color'],
     ))
 
-    # RKI scatter points
-    fig.add_trace(go.Scatter(
-        name='Daten RKI',
-        x=x_data, y=df['RKI Meldedaten'],
-        mode='markers',
-        marker=dict(color="black", size=6)
-    ))
+    if rki:
+        # RKI scatter points
+        fig.add_trace(go.Scatter(
+            name='Daten RKI',
+            x=x_data, y=df['RKI Meldedaten'],
+            mode='markers',
+            marker=dict(color="black", size=6)
+        ))
 
     return fig
 
 
 def update_layout(fig, fixedrange=False,
+                  skip_first_7=False,
                   color_legend='rgb(229, 236, 246)', 
                   color_forecast='rgb(24, 145, 255)', 
                   color_nowcast='rgb(136, 207, 250)'):
     # Find y_max from q95 column data
-    y_max = max(fig.data[5]['y'])
+    if skip_first_7:
+        y_max = max(fig.data[5]['y'][7:])
+    else:
+        y_max = max(fig.data[5]['y'])
     x_data = fig.data[-1]['x']
     x_labels = []
     # Create x-axis labels
@@ -247,69 +281,16 @@ def minimize(fig):
     )
 
 
-def plotit(df, column_dict, 
+def plotit(df, column_dict, rki=True, 
+           skip_first_7=False,
            fixedrange=False,
            color_legend='rgb(229, 236, 246)', 
            color_forecast='rgb(24, 145, 255)', 
            color_nowcast='rgb(136, 207, 250)'):
     fig = create_figure_from_df(df, column_dict)
-    return update_layout(fig, fixedrange=fixedrange,
+    return update_layout(fig, 
+                         skip_first_7=skip_first_7,
+                         fixedrange=fixedrange,
                          color_legend=color_legend,
                          color_forecast=color_forecast,
                          color_nowcast=color_nowcast)
-
-
-def create_placeholder(height=500, width=1000, scale_factor=1, 
-                       source="https://raw.githubusercontent.com/FZJ-JSC/jupyter-jsc-dashboards/master/covid19/assets/placeholders/plot_not_found.png"):
-    # Create figure
-    fig = go.Figure()
-
-    # Add invisible scatter trace.
-    # This trace is added to help the autoresize logic work.
-    fig.add_trace(
-        go.Scatter(
-            x=[0, width * scale_factor],
-            y=[0, height * scale_factor],
-            mode="markers",
-            marker_opacity=0
-        )
-    )
-
-    # Configure axes
-    fig.update_xaxes(
-        visible=False,
-        range=[0, width * scale_factor]
-    )
-
-    fig.update_yaxes(
-        visible=False,
-        range=[0, height * scale_factor],
-        # the scaleanchor attribute ensures that the aspect ratio stays constant
-        scaleanchor="x"
-    )
-
-    # Add image
-    fig.add_layout_image(
-        dict(
-            x=0,
-            sizex=width * scale_factor,
-            y=height * scale_factor,
-            sizey=height * scale_factor,
-            xref="x",
-            yref="y",
-            opacity=1.0,
-            layer="below",
-            sizing="stretch",
-            source=source)
-    )
-
-    # Configure other layout
-    fig.update_layout(
-        width=width * scale_factor,
-        height=height * scale_factor,
-        margin={"l": 0, "r": 0, "t": 0, "b": 0},
-    )
-    
-    # Show fig with config={'displayModeBar': False, 'staticPlot': True})
-    # to hide the mode bar and disable interaction.
-    return fig
