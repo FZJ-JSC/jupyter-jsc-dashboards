@@ -12,6 +12,9 @@ from layouts.position_controls import pos_controls
 
 tab_height = '5vh'
 
+with open('txt/warning.txt') as txt_file:
+    warning_txt = txt_file.read()
+
 body_layout = dbc.Container(
     style={'marginTop': 100, 'marginBottom': 20},
     children=[
@@ -30,6 +33,11 @@ body_layout = dbc.Container(
                         #####  **Ein Gemeinschaftsprojekt der Arbeitsgruppe [Neuroinformatik an der Universität Osnabrück](https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics)**  
                         #####  **und des [Jülich Supercomputing Centre](https://www.fz-juelich.de/jsc), auf Basis der Daten des [RKI](https://www.rki.de/DE/Content/Infekt/IfSG/Signale/Projekte/Signale_Projekte_node.html;jsessionid=C61DE534E8208B0D69BEAD299FC753F9.internet091)**
                         """
+                    ),
+                    dbc.Alert(
+                        html.H5(warning_txt, className='alert-heading'),
+                        color='danger',
+                        style={'display': 'block' if warning_txt != '' else 'none'},
                     ),
                 ]
             ), 
