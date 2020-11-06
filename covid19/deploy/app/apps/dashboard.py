@@ -12,7 +12,7 @@ from layouts.position_controls import pos_controls
 
 tab_height = '5vh'
 
-with open('txt/warning.txt') as txt_file:
+with open('assets/warning.txt') as txt_file:
     warning_txt = txt_file.read()
 
 body_layout = dbc.Container(
