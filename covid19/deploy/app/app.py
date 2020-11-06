@@ -51,7 +51,7 @@ init_countyid = 11001  # Berlin Mitte
 
 
 # Days and dates.
-deltadays = 25
+deltadays = 0 #25
 
 # Minimum date.
 if os.environ.get('MIN_DATE') is not None:
