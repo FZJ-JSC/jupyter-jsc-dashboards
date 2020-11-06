@@ -211,7 +211,7 @@ def update_layout(fig, fixedrange=False,
         title="Fallzahlen/Tag nach Meldedatum",
         autorange=False,
         range=[-5, y_max],
-        dtick=20, # 10
+#         dtick=20, # 10
         fixedrange=fixedrange  # Disable zooming
     )
 

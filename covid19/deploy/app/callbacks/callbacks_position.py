@@ -3,9 +3,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 
-from app import app, asset_url, init_countyid
-from dash.dependencies import Input, Output, State
-from plotly_figures.curves import *
+from app import app, asset_url, counties_metadf, init_countyid
+from dash.dependencies import Input, Output
+from plotly_figures import curves
 
 
 # Change dropbox value on map-click
@@ -23,7 +23,7 @@ def update_mapclick(choro1_click, choro2_click):
         id_str = counties_metadf['cca'][cid]
     return int(id_str)
 
-
+    
 # Plot geglättet
 @app.callback(
     [Output(component_id='geglaettet_img', component_property='children'),
@@ -40,12 +40,12 @@ def update_geglaettet_img(value, assets_dir):
         )
         return img, img
     
-    fig_trend = plotly_curves.plotit(df_curve, plotly_curves.column_dict_trend)
-    fig_trend_fixedrange = plotly_curves.plotit(
-        df_curve, plotly_curves.column_dict_trend, 
+    fig_trend = curves.plotit(df_curve, curves.column_dict_trend)
+    fig_trend_fixedrange = curves.plotit(
+        df_curve, curves.column_dict_trend, 
         fixedrange=True,
     )
-    plotly_curves.minimize(fig_trend_fixedrange)
+    curves.minimize(fig_trend_fixedrange)
     
     graph_small = dcc.Graph(
         figure=fig_trend_fixedrange,
@@ -55,7 +55,7 @@ def update_geglaettet_img(value, assets_dir):
             ], 
             'displaylogo': False
         },
-        style={'width': '100%', 'height': '300px'}
+        style={'width': '100%', 'height': '500px'}
     )    
     graph =  dcc.Graph(
         figure=fig_trend,
@@ -86,12 +86,12 @@ def update_ungeglaettet_img(value, assets_dir):
         )
         return img, img
     
-    fig_raw = plotly_curves.plotit(df_curve, plotly_curves.column_dict_raw)
-    fig_raw_fixedrange = plotly_curves.plotit(
-        df_curve, plotly_curves.column_dict_raw, 
+    fig_raw = curves.plotit(df_curve, curves.column_dict_raw)
+    fig_raw_fixedrange = curves.plotit(
+        df_curve, curves.column_dict_raw, 
         fixedrange=True,
     )
-    plotly_curves.minimize(fig_raw_fixedrange)
+    curves.minimize(fig_raw_fixedrange)
     
     graph_small = dcc.Graph(
         figure=fig_raw_fixedrange,
@@ -101,7 +101,7 @@ def update_ungeglaettet_img(value, assets_dir):
             ], 
             'displaylogo': False
         },
-        style={'width': '100%', 'height': '300px'}
+        style={'width': '100%', 'height': '500px'}
     )    
     graph =  dcc.Graph(
         figure=fig_raw,
@@ -133,15 +133,15 @@ def update_inzidenz_img(value, assets_dir):
         return img, img
     
     try:
-        fig_inzidenz = plotly_curves.plotit(
-            df_curve, plotly_curves.column_dict_7days,
-            rki=False, sevendays=True
+        fig_inzidenz = curves.plotit(
+            df_curve, curves.column_dict_7days,
+            rki=False, skip_first_7=True
         )
-        fig_inzidenz_fixedrange = plotly_curves.plotit(
-            df_curve, plotly_curves.column_dict_7days, 
-            rki=False, sevendays=True, fixedrange=True,
+        fig_inzidenz_fixedrange = curves.plotit(
+            df_curve, curves.column_dict_7days, 
+            rki=False, skip_first_7=True, fixedrange=True,
         )
-        plotly_curves.minimize(fig_inzidenz_fixedrange)
+        curves.minimize(fig_inzidenz_fixedrange)
     except KeyError:
         img = html.Img(
             src=asset_url+"placeholders/plot_not_found.png",
@@ -157,7 +157,7 @@ def update_inzidenz_img(value, assets_dir):
             ], 
             'displaylogo': False
         },
-        style={'width': '100%', 'height': '300px'}
+        style={'width': '100%', 'height': '500px'}
     )    
     graph =  dcc.Graph(
         figure=fig_inzidenz,

@@ -1,4 +1,4 @@
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from plotly_figures.maps import *
 
 from app import app, cache, cache_timeout, get_assets_dir
@@ -8,8 +8,8 @@ from app import counties_geojson, counties_metadf
 # Callbacks
 # Hidden div
 @app.callback(
-    Output(component_id='output_container_date_picker_center', component_property='children'),
-    [Input(component_id='date_picker_center', component_property='date')])
+    Output(component_id='date_picker_output_container', component_property='children'),
+    [Input(component_id='date_picker', component_property='date')])
 def update_date_picker(date):
     if date is not None:
         return get_assets_dir(date)
