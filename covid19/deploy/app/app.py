@@ -96,3 +96,7 @@ init_mapfig_bstim = create_map_figure(
 init_mapfig_rki = create_map_figure(
     counties_geojson, counties_metadf, mapcsv_path, column='newInf100k_RKI',)
 #     width=500, height=450)
+
+
+# import layout at the end of this file is important to deploy it with gunicorn
+import index
