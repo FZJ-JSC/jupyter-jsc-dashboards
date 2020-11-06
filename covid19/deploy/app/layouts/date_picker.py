@@ -23,7 +23,7 @@ def create_date_picker(date_picker_name):
         ),
         html.Div(
             id='{}_output_container'.format(date_picker_name),
-#             style={'display': 'none'},
+            style={'display': 'none'},
             children=[
                 (init_date + timedelta(days=deltadays)).strftime('%Y_%m_%d')],
         ),
