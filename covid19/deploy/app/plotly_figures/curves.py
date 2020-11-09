@@ -240,7 +240,7 @@ def update_layout(fig, fixedrange=False,
     fig.add_annotation(xref="x", x=x_data[-10],
                        text="Nowcast", bgcolor=color_nowcast)
     fig.add_annotation(xref="x", x=x_data[-5], 
-                       text="Forecast", bgcolor=color_forecast)
+                       text="Prognose", bgcolor=color_forecast)
     fig.update_annotations(
         xanchor="left", yanchor="top",
         yref="y", y=y_max, 
