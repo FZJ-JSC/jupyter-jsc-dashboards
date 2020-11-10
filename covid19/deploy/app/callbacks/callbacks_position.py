@@ -73,7 +73,7 @@ def update_plot(value, assets_dir, column_dict):
             src=asset_url+"placeholders/plot_not_found.png",
             style={'width': '100%', 'height': '100%'},
         )
-        logging.debug("Could not find assets/csv/{0}{1:05d}.csv. Falling back to {}".format(
+        logging.debug("Could not find assets/csv/{0}{1:05d}.csv. Falling back to {2}".format(
             assets_dir, value, asset_url+"placeholders/plot_not_found.png"))
         return img, img
     
