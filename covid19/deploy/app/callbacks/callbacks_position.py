@@ -7,7 +7,7 @@ import pandas as pd
 from app import app, asset_url, counties_metadf, init_countyid
 from callbacks.logging import setup_logger
 from dash.dependencies import Input, Output
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 from plotly_figures import curves
 
 
@@ -51,6 +51,7 @@ def update_plot(value, assets_dir, column_dict):
         threshhold_date = dt.strptime(threshhold_date, '%Y_%m_%d')
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if selected_date <= threshhold_date:
+            assets_dir = (selected_date - timedelta(days=25)).strftime('%Y_%m_%d') + "/"
             img_path = "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
             logger.debug("Update plot: Looking for {}".format(img_path))
             if os.path.isfile(os.path.join('assets', img_path)):

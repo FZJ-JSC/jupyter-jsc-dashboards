@@ -6,7 +6,7 @@ from app import app, asset_url, get_assets_dir, init_assets_dir
 from app import cache, cache_timeout
 from app import counties_geojson, counties_metadf
 from callbacks.logging import setup_logger
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 
 
 logger = setup_logger()
@@ -39,6 +39,7 @@ def update_map(assets_dir, column):
         threshhold_date = dt.strptime(threshhold_date, '%Y_%m_%d')
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if selected_date <= threshhold_date:
+            assets_dir = (selected_date - timedelta(days=25)).strftime('%Y_%m_%d') + "/"
             mapcsv_path = "assets/figures/{}map.csv".format(assets_dir)
             logger.debug("Update map: Looking for {}".format(mapcsv_path))
         else:
