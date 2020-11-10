@@ -5,10 +5,15 @@
 # https://mapshaper.org
 
 import json
+import logging
 import pandas as pd
 import plotly.graph_objects as go
 
 from numpy import nan
+
+
+log = logging.getLogger(__name__)
+log.setLevel(level=os.environ.get('LOGLEVEL', 'WARNING'))
 
 
 def create_static_map_data(geojson_path):
@@ -48,7 +53,7 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
             else:
                 infections_array.append(0.0)     
     except IOError:
-        print("File not found: " + mapcsv_path)
+        log.debug("File not found: " + mapcsv_path)
         for feat in counties_geojson['features']:
             infections_array.append(nan)
 

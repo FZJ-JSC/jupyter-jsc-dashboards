@@ -9,6 +9,10 @@ from app import counties_geojson, counties_metadf
 from datetime import datetime as dt
 
 
+log = logging.getLogger(__name__)
+log.setLevel(level=os.environ.get('LOGLEVEL', 'WARNING'))
+
+
 # Hidden div
 @app.callback(
     Output(component_id='date_picker_left_output_container', component_property='children'),
@@ -37,13 +41,13 @@ def update_map(assets_dir, column):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if selected_date <= threshhold_date:
             mapcsv_path = "assets/figures/{}map.csv".format(assets_dir)
-            logging.debug("Update map: Looking for {}".format(mapcsv_path))
+            log.debug("Update map: Looking for {}".format(mapcsv_path))
         else:
             mapcsv_path = "assets/csv/{}map.csv".format(assets_dir)
-            logging.debug("Update map: Looking for {}".format(mapcsv_path))
+            log.debug("Update map: Looking for {}".format(mapcsv_path))
     else:
         mapcsv_path = "assets/figures/{}map.csv".format(assets_dir)
-        logging.debug("Update map: Looking for {}".format(mapcsv_path))
+        log.debug("Update map: Looking for {}".format(mapcsv_path))
     mapfig = create_map_figure(
         counties_geojson, counties_metadf, mapcsv_path, column=column,
         zmax=10

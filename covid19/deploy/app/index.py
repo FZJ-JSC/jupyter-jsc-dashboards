@@ -1,6 +1,5 @@
 import dash_core_components as dcc
 import dash_html_components as html
-import logging
 from dash.dependencies import Input, Output
 
 from app import app
@@ -36,5 +35,4 @@ def display_page(pathname):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=os.environ.get('LOGLEVEL', 'WARNING'))
     app.run_server(debug=True)
