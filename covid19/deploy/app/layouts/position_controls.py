@@ -20,5 +20,6 @@ def create_position_controls(position_control_name):
     ),
 ])
 
-pos_controls = create_position_controls('pos_control')
+pos_controls_left = create_position_controls('pos_control_left')
+pos_controls_right = create_position_controls('pos_control_right')
 

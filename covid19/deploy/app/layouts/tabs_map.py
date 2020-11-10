@@ -40,5 +40,8 @@ def create_map_tab(tab_name, figure):
         ])
 
 
-rki_map_tab = create_map_tab('rki_map_tab', init_mapfig_rki)
-bstim_map_tab = create_map_tab('bstim_map_tab', init_mapfig_bstim)
+rki_map_tab_left = create_map_tab('rki_map_tab_left', init_mapfig_rki)
+bstim_map_tab_left = create_map_tab('bstim_map_tab_left', init_mapfig_bstim)
+
+rki_map_tab_right = create_map_tab('rki_map_tab_right', init_mapfig_rki)
+bstim_map_tab_right = create_map_tab('bstim_map_tab_right', init_mapfig_bstim)

@@ -240,7 +240,7 @@ def update_layout(fig, fixedrange=False,
     fig.add_annotation(xref="x", x=x_data[-10],
                        text="Nowcast", bgcolor=color_nowcast)
     fig.add_annotation(xref="x", x=x_data[-5], 
-                       text="Prognose", bgcolor=color_forecast)
+                       text="Forecast", bgcolor=color_forecast)
     fig.update_annotations(
         xanchor="left", yanchor="top",
         yref="y", y=y_max, 
@@ -257,7 +257,11 @@ def update_layout(fig, fixedrange=False,
     return fig
 
 
-def minimize(fig):
+def minimize(fig, height=None, width=None):
+    if height:
+        fig.update_layout(height=height)
+    if width:
+        fig.update_layout(width=width)
     font_size = 8
     fig.update_layout(
         legend=dict(

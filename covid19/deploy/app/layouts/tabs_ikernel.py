@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-from app import app
+from app import app, asset_url, init_date
 from dash.dependencies import Input, Output, State
 
 
@@ -35,13 +35,13 @@ def create_interpretation_help(no, markdown):
 ])
 
 
-def create_inter_help_columns(no):
+def create_inter_help_columns(tab_name, no):
     return dbc.Col(
         html.Div(
-            id='ikernel_inter{}_div'.format(no),
+            id='{}_inter{}_div'.format(tab_name, no),
             children=[
                 html.Img(
-                    id='ikernel_inter{}'.format(no),
+                    id='{}_inter{}'.format(tab_name, no),
                     src=asset_url+"ikernel-{}-border.png".format(no),
                     style={'width': '80%', 'height': '80%'},
                 ),
@@ -49,6 +49,82 @@ def create_inter_help_columns(no):
         ),
         width={'size': 3, 'offset': 1},
     )
+
+
+# Modal large view of kernel
+def create_ikernel_tab_modal(tab_name):
+    return html.Div([
+        dbc.Button(
+            "Vergrößern", 
+            id='{}_modal_open'.format(tab_name), 
+            outline=True, 
+            color='secondary', 
+            className='mr-1'),
+        dbc.Modal(
+            id='{}_modal'.format(tab_name),
+            size='xl',
+            children=[
+                dbc.ModalHeader("Interaktionskernel"),
+                dbc.ModalBody([
+                    html.Img(
+                        id='{}_modal_img'.format(tab_name),
+                        src=asset_url+"figures/"+init_date.strftime('%Y_%m_%d')+"/interaction_kernel.png",
+                        style={'width': '100%', 'height': '100%'},
+                    ),
+                ]),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Schließen", 
+                        id='{}_modal_close'.format(tab_name), 
+                        className='ml-auto')
+                ),
+            ],
+        ),
+    ])
+
+
+def create_ikernel_tab(tab_name, tooltip):
+    return dbc.Card(
+        outline=True,
+        color="light",
+        className="mt-3",    
+        children=[ 
+            dbc.CardBody([
+                html.Div(
+                    id='{}_img_div'.format(tab_name),
+                    children=[
+                        create_ikernel_tab_modal(tab_name),
+                        dcc.Loading(
+                            id='{}_loading_img'.format(tab_name), 
+                            children=[
+                                html.Img(
+                                    id='{}_img'.format(tab_name),
+                                    src=asset_url + "figures/" + init_date.strftime('%Y_%m_%d') + "/interaction_kernel.png",
+                                    style={'width': '100%', 'height': '100%'},
+                                ),
+                            ],
+                            type='circle', # 'graph', 'cube', 'circle', 'dot', 'default'
+                            color='#343A40',
+                            style={'height': '450px'},
+                        ),
+                        dbc.Tooltip(
+                            tooltip,
+                            target='{}_img'.format(tab_name),
+                            style={'width': '200%'},
+                            placement='left',
+                        ),
+                    ]),
+                html.Div([
+                    dbc.Row(
+                        dbc.Col(
+                            html.Div("Klick ähnliche Darstellung für Interpretationshilfe:"),
+                            width={'size': 11, 'offset': 1},
+                        )
+                    ),
+                    dbc.Row([create_inter_help_columns(tab_name, i) for i in [1, 2, 3]]),
+                ]),
+            ]),
+        ])
 
 
 # Interpretation help
@@ -65,76 +141,8 @@ with open('txt/ikernel_inter3.md') as md_file:
 ikernel_inter3_modal = create_interpretation_help(3, ikernel_inter3_md)
 
 
-# Modal large view of kernel
-ikernel_tab_modal = html.Div([
-    dbc.Button(
-        "Vergrößern", 
-        id='ikernel_tab_modal_open', 
-        outline=True, 
-        color='secondary', 
-        className='mr-1'),
-    dbc.Modal(
-        id='ikernel_tab_modal',
-        size='xl',
-        children=[
-            dbc.ModalHeader("Interaktionskernel"),
-            dbc.ModalBody([
-                html.Img(
-                    id='ikernel_tab_modal_img',
-                    src=asset_url+"figures/"+init_date.strftime('%Y_%m_%d')+"/interaction_kernel.png",
-                    style={'width': '100%', 'height': '100%'},
-                ),
-            ]),
-            dbc.ModalFooter(
-                dbc.Button(
-                    "Schließen", 
-                    id='ikernel_tab_modal_close', 
-                    className='ml-auto')
-            ),
-        ],
-    ),
-]) 
-
-
-# Ikernel Tab
-ikernel_tab = dbc.Card(
-    outline=True,
-    color="light",
-    className="mt-3",    
-    children=[ 
-        dbc.CardBody([
-            html.Div(
-                id='ikernel_tab_img_div',
-                children=[
-                    ikernel_tab_modal,
-                    dcc.Loading(
-                        id='ikernel_tab_loading_img', 
-                        children=[
-                            html.Img(
-                                id="ikernel_tab_img",
-                                src=asset_url + "figures/" + init_date.strftime('%Y_%m_%d') + "/interaction_kernel.png",
-                                style={'width': '100%', 'height': '100%'},
-                            ),
-                        ],
-                        type='circle', # 'graph', 'cube', 'circle', 'dot', 'default'
-                        color='#343A40',
-                        style={'height': '450px'},
-                    ),
-                    dbc.Tooltip(
-                        ikernel_tab_tooltip,
-                        target='ikernel_tab_img',
-                        style={'width': '200%'},
-                        placement='left',
-                    ),
-                ]),
-            html.Div([
-                dbc.Row(
-                    dbc.Col(
-                        html.Div("Klick ähnliche Darstellung für Interpretationshilfe:"),
-                        width={'size': 11, 'offset': 1},
-                    )
-                ),
-                dbc.Row([create_inter_help_columns(i) for i in [1, 2, 3]]),
-            ]),
-        ]),
-    ])
+# Ikernel Tabs
+with open('txt/ikernel_tooltip.txt') as txt_file:
+    ikernel_tooltip = txt_file.read()
+ikernel_tab_left = create_ikernel_tab('ikernel_tab_left', ikernel_tooltip)
+ikernel_tab_right = create_ikernel_tab('ikernel_tab_right', ikernel_tooltip)

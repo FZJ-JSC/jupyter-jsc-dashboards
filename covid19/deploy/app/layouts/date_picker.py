@@ -34,4 +34,5 @@ def create_date_picker(date_picker_name):
     ])
 
 
-date_picker = create_date_picker('date_picker')
+date_picker_left = create_date_picker('date_picker_left')
+date_picker_right = create_date_picker('date_picker_right')
