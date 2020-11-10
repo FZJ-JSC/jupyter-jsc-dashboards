@@ -92,7 +92,7 @@ def update_plot(value, assets_dir, column_dict):
         style={'width': '100%', 'height': '300px'}
     )
     graph = dcc.Graph(
-        figure=fig_trend,
+        figure=fig,
         style={'width': '100%', 'height': '100%'},
         config={
             'displayModeBar': True, 
