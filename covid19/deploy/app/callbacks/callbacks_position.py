@@ -1,18 +1,17 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import logging
 import os
 import pandas as pd
 
 from app import app, asset_url, counties_metadf, init_countyid
+from callbacks.logging import setup_logger
 from dash.dependencies import Input, Output
 from datetime import datetime as dt
 from plotly_figures import curves
 
 
-log = logging.getLogger(__name__)
-log.setLevel(level=os.environ.get('LOGLEVEL', 'WARNING'))
+logger = setup_logger()
 
 
 # Change dropbox value on map-click
@@ -53,7 +52,7 @@ def update_plot(value, assets_dir, column_dict):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if selected_date <= threshhold_date:
             img_path = "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
-            log.debug("Update plot: Looking for {}".format(img_path))
+            logger.debug("Update plot: Looking for {}".format(img_path))
             if os.path.isfile(os.path.join('assets', img_path)):
                 img = html.Img(
                     src=asset_url+img_path,
@@ -64,12 +63,12 @@ def update_plot(value, assets_dir, column_dict):
                     src=asset_url+"placeholders/plot_not_found.png",
                     style={'width': '100%', 'height': '100%'},
                 )
-                log.debug("Could not find {}. Falling back to {}".format(
+                logger.debug("Could not find {}. Falling back to {}".format(
                     img_path, asset_url+"placeholders/plot_not_found.png"))
             return img, img
     
     try:
-        log.debug("Update plot: Looking for assets/csv/{0}{1:05d}.csv".format(
+        logger.debug("Update plot: Looking for assets/csv/{0}{1:05d}.csv".format(
             assets_dir, value))
         df_curve = pd.read_csv('assets/csv/{0}{1:05d}.csv'.format(assets_dir, value))
     except FileNotFoundError:
@@ -77,7 +76,7 @@ def update_plot(value, assets_dir, column_dict):
             src=asset_url+"placeholders/plot_not_found.png",
             style={'width': '100%', 'height': '100%'},
         )
-        log.debug("Could not find assets/csv/{0}{1:05d}.csv. Falling back to {2}".format(
+        logger.debug("Could not find assets/csv/{0}{1:05d}.csv. Falling back to {2}".format(
             assets_dir, value, asset_url+"placeholders/plot_not_found.png"))
         return img, img
     

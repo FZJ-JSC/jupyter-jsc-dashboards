@@ -13,8 +13,13 @@ import plotly.graph_objects as go
 from numpy import nan
 
 
-log = logging.getLogger(__name__)
-log.setLevel(level=os.environ.get('LOGLEVEL', 'WARNING'))
+logger = logging.getLogger(__name__)
+logger.setLevel(os.environ.get('LOGLEVEL', 'WARNING'))
+fh = logging.FileHandler('logs/log.out')
+fh.setLevel(os.environ.get('LOGLEVEL', 'WARNING'))
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 def create_static_map_data(geojson_path):
@@ -54,7 +59,7 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
             else:
                 infections_array.append(0.0)     
     except IOError:
-        log.debug("File not found: " + mapcsv_path)
+        logger.debug("File not found: " + mapcsv_path)
         for feat in counties_geojson['features']:
             infections_array.append(nan)
 

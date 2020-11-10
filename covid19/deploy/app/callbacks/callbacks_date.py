@@ -1,4 +1,3 @@
-import logging
 import os
 from dash.dependencies import Input, Output
 from plotly_figures.maps import *
@@ -6,11 +5,11 @@ from plotly_figures.maps import *
 from app import app, asset_url, get_assets_dir, init_assets_dir
 from app import cache, cache_timeout
 from app import counties_geojson, counties_metadf
+from callbacks.logging import setup_logger
 from datetime import datetime as dt
 
 
-log = logging.getLogger(__name__)
-log.setLevel(level=os.environ.get('LOGLEVEL', 'WARNING'))
+logger = setup_logger()
 
 
 # Hidden div
@@ -41,13 +40,13 @@ def update_map(assets_dir, column):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if selected_date <= threshhold_date:
             mapcsv_path = "assets/figures/{}map.csv".format(assets_dir)
-            log.debug("Update map: Looking for {}".format(mapcsv_path))
+            logger.debug("Update map: Looking for {}".format(mapcsv_path))
         else:
             mapcsv_path = "assets/csv/{}map.csv".format(assets_dir)
-            log.debug("Update map: Looking for {}".format(mapcsv_path))
+            logger.debug("Update map: Looking for {}".format(mapcsv_path))
     else:
         mapcsv_path = "assets/figures/{}map.csv".format(assets_dir)
-        log.debug("Update map: Looking for {}".format(mapcsv_path))
+        logger.debug("Update map: Looking for {}".format(mapcsv_path))
     mapfig = create_map_figure(
         counties_geojson, counties_metadf, mapcsv_path, column=column,
         zmax=10
