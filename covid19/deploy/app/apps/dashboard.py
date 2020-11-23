@@ -123,7 +123,7 @@ body_layout = dbc.Container(
                             children=[
                                 dbc.Tabs(
                                     id='date_card_left_tabs',
-                                    active_tab='tab-0',
+                                    active_tab='tab-1',
                                         children=[
                                             dbc.Tab(
                                                 rki_map_tab_left, 
@@ -197,7 +197,7 @@ body_layout = dbc.Container(
                             children=[
                                 dbc.Tabs(
                                     id='date_card_right_tabs',
-                                    active_tab='tab-0',
+                                    active_tab='tab-1',
                                         children=[
                                             dbc.Tab(
                                                 rki_map_tab_right, 
