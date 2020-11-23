@@ -56,34 +56,40 @@ def update_map(assets_dir, column):
 
 
 # BSTIM map
+# Use date picker as Input and not its output container to  
+# prevent rerendering of the map when the window is resized.
 @app.callback(
      Output(component_id='bstim_map_tab_left_graph', component_property='figure'),
-    [Input(component_id='date_picker_left_output_container', component_property='children')])
+    [Input(component_id='date_picker_left', component_property='date')])
 @cache.memoize(timeout=cache_timeout)
-def update_bstim_map(assets_dir):
+def update_bstim_map(date):
+    assets_dir = get_assets_dir(date)
     return update_map(assets_dir, column='newInf100k')
 
 @app.callback(
      Output(component_id='bstim_map_tab_right_graph', component_property='figure'),
-    [Input(component_id='date_picker_right_output_container', component_property='children')])
+    [Input(component_id='date_picker_right', component_property='date')])
 @cache.memoize(timeout=cache_timeout)
-def update_bstim_map(assets_dir):
+def update_bstim_map(date):
+    assets_dir = get_assets_dir(date)
     return update_map(assets_dir, column='newInf100k')
 
 
 # RKI map
 @app.callback(
     Output(component_id='rki_map_tab_left_graph', component_property='figure'),
-    [Input(component_id='date_picker_left_output_container', component_property='children')])
+    [Input(component_id='date_picker_left', component_property='date')])
 @cache.memoize(timeout=cache_timeout)
-def update_rki_map(assets_dir):
+def update_rki_map(date):
+    assets_dir = get_assets_dir(date)
     return update_map(assets_dir, column='newInf100k_RKI')
 
 @app.callback(
     Output(component_id='rki_map_tab_right_graph', component_property='figure'),
-    [Input(component_id='date_picker_right_output_container', component_property='children')])
+    [Input(component_id='date_picker_right', component_property='date')])
 @cache.memoize(timeout=cache_timeout)
-def update_rki_map(assets_dir):
+def update_rki_map(date):
+    assets_dir = get_assets_dir(date)
     return update_map(assets_dir, column='newInf100k_RKI')
 
 
