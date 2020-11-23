@@ -93,7 +93,12 @@ def create_map_figure(counties_geojson, counties_metadf,
             ),
             zmin=0, zmax=zmax,
             # Set lines between features
-            marker_opacity=0.75, marker_line_width=0.1
+            marker_opacity=0.75, marker_line_width=0.1,
+            # Set data shown on hover
+            hovertemplate=
+                "<b>%{text}</b><br>" +
+                "%{z:.2f}<br>" +
+                "<extra></extra>",
         )
     ) 
     
