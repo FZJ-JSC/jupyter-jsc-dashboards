@@ -106,10 +106,10 @@ counties_geojson, counties_metadf = create_static_map_data(geojson_path)
 
 # Initial maps.
 init_mapfig_bstim = create_map_figure(
-    counties_geojson, counties_metadf, mapcsv_path, column='newInf100k',)
+    counties_geojson, counties_metadf, mapcsv_path, column='newInf100k',
     width=500, height=450) # size is important to ensure, that figure is created _now_ and not on resize-event
 init_mapfig_rki = create_map_figure(
-    counties_geojson, counties_metadf, mapcsv_path, column='newInf100k_RKI',)
+    counties_geojson, counties_metadf, mapcsv_path, column='newInf100k_RKI',
     width=500, height=450) # size is important to ensure, that figure is created _now_ and not on resize-event
 
 
