@@ -11,19 +11,19 @@ from datetime import datetime as dt, timedelta
 from plotly_figures.maps import *
 
 
-# JupyterLab
-#from jupyter_dash import JupyterDash
-#dash_app = JupyterDash(
+## JupyterLab
+# from jupyter_dash import JupyterDash
+# dash_app = JupyterDash(
 app = dash.Dash(  # Deploy
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     update_title=None,
     suppress_callback_exceptions=True, # because of multi-page setup
 )
-#app = dash_app  # JupyterLab
+# app = dash_app  # JupyterLab
 app.title = 'Covid-19-Interaktionsmodell'
 
-#cache_dir = "./cache"  # JupyterLab
+# cache_dir = "./cache"  # JupyterLab
 cache_dir = "/app/cache"  # Deploy
 Path(cache_dir).mkdir(parents=True, exist_ok=True)
 cache = Cache(app.server, config={

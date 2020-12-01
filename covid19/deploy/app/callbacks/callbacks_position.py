@@ -48,7 +48,6 @@ def update_mapclick(choro1_click, choro2_click):
 
 # Callback plots
 def update_plot(value, assets_dir, column_dict):
-    print("update_plots(): {}".format(assets_dir))
     selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
     assets_datadir = get_assets_datadir(selected_date)
 
@@ -57,7 +56,6 @@ def update_plot(value, assets_dir, column_dict):
                 img_path = assets_datadir + "curve_trend_{0:05d}.png".format(value)
             else:
                 img_path = assets_datadir + "curve_{0:05d}.png".format(value)
-            print(img_path)
             logger.debug("Update plot: Looking for {}".format(img_path))
             if os.path.isfile(os.path.join('assets', img_path)):
                 img = html.Img(
@@ -154,8 +152,9 @@ def update_pos_txt(value, assets_dir):
     msg = " "
     if value is not None:
         try:
-            assets_datadir = get_assets_datadir(dt.strptime(assets_dir, '%Y_%m_%d'))
-            mdat = pd.read_csv("./" + assets_datadir + "/metadata.csv")
+            assets_datadir = get_assets_datadir(dt.strptime(assets_dir, '%Y_%m_%d/'))
+            metadata_path = "./assets/" + assets_datadir + "/metadata.csv"
+            mdat = pd.read_csv(metadata_path)
             msg = mdat.loc[mdat['countyID'] == value]['probText'].to_string(index=False)
             try:
                 val = float(msg)
