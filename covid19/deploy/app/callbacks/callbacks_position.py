@@ -5,6 +5,7 @@ import os
 import pandas as pd
 
 from app import app, asset_url, counties_metadf, init_countyid
+from app import fixed_plot_width, fixed_plot_height
 from callbacks.logging import setup_logger
 from dash.dependencies import Input, Output
 from datetime import datetime as dt, timedelta
@@ -83,7 +84,7 @@ def update_plot(value, assets_dir, column_dict):
     
     fig = curves.plotit(df_curve, column_dict)
     fig_fixedrange = curves.plotit(df_curve, column_dict, fixedrange=True,)
-    curves.minimize(fig_fixedrange)
+    curves.minimize(fig_fixedrange, width=fixed_plot_width, height=fixed_plot_height)
 
     graph_small = dcc.Graph(
         figure=fig_fixedrange,

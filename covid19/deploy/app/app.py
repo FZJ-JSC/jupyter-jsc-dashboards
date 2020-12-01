@@ -10,13 +10,16 @@ from pathlib import Path
 from datetime import datetime as dt, timedelta
 from plotly_figures.maps import *
 
-
-app = dash.Dash(
+# JupyterLab
+# from jupyter_dash import JupyterDash
+# dash_app = JupyterDash(
+app = dash.Dash(  # Deploy
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     update_title=None,
     suppress_callback_exceptions=True, # because of multi-page setup
 )
+# dash_app = app  # JupyterLab
 app.title = 'Covid-19-Interaktionsmodell'
 
 # cache_dir = "./cache"  # JupyterLab
@@ -25,8 +28,13 @@ Path(cache_dir).mkdir(parents=True, exist_ok=True)
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
     'CACHE_DIR': cache_dir,
+    # 'CACHE_THRESHOLD': 10000, # max. no. items stored before deletion starts (only for SimpleCache and FileSystemCache)
+    ## try 'redis' if you want to use a database for caching
+    # 'CACHE_TYPE': 'redis'
+    # 'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')  
 })
-cache_timeout=1 #86400  # one day in secounds
+# cache_timeout = 1 # JupyterLab
+cache_timeout = 86400  # one day in secounds
 cache.clear()
 
 server = app.server
@@ -49,9 +57,16 @@ else:
 # Initial county id.
 init_countyid = 11001  # Berlin Mitte
 
+# zmax
+zmax = 100
+
+# set fixed width and height of plot
+# (needed to ensure users do not see the plot too large first on Firefox)
+fixed_plot_width = 450
+fixed_plot_height = 300
 
 # Days and dates.
-deltadays = 0 #25
+deltadays = 0 # 25
 
 # Minimum date.
 if os.environ.get('MIN_DATE') is not None:
@@ -92,10 +107,10 @@ counties_geojson, counties_metadf = create_static_map_data(geojson_path)
 # Initial maps.
 init_mapfig_bstim = create_map_figure(
     counties_geojson, counties_metadf, mapcsv_path, column='newInf100k',)
-#     width=500, height=450)
+    width=500, height=450) # size is important to ensure, that figure is created _now_ and not on resize-event
 init_mapfig_rki = create_map_figure(
     counties_geojson, counties_metadf, mapcsv_path, column='newInf100k_RKI',)
-#     width=500, height=450)
+    width=500, height=450) # size is important to ensure, that figure is created _now_ and not on resize-event
 
 
 # import layout at the end of this file is important to deploy it with gunicorn

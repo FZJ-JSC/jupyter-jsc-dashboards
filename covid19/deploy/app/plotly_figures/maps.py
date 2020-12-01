@@ -76,7 +76,7 @@ def create_map_figure(counties_geojson, counties_metadf,
         go.Choroplethmapbox(
             geojson=counties_geojson,
             # Set which features in geojson to plot using their feature id field.
-            locations=counties_metadf.geoids,  
+            locations=counties_metadf.geoids,
             # Set text elements associated with each location.
             text=counties_metadf.names,
             # Set data to be color-coded.

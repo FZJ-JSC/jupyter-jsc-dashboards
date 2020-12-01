@@ -2,7 +2,7 @@ import os
 from dash.dependencies import Input, Output
 from plotly_figures.maps import *
 
-from app import app, asset_url, get_assets_dir, init_assets_dir
+from app import app, asset_url, get_assets_dir, init_assets_dir, zmax
 from app import cache, cache_timeout
 from app import counties_geojson, counties_metadf
 from callbacks.logging import setup_logger
@@ -50,7 +50,7 @@ def update_map(assets_dir, column):
         logger.debug("Update map: Looking for {}".format(mapcsv_path))
     mapfig = create_map_figure(
         counties_geojson, counties_metadf, mapcsv_path, column=column,
-        zmax=10
+        zmax=zmax
     )
     return mapfig    
 
