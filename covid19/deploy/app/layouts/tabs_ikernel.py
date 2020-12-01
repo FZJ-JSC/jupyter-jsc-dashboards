@@ -68,7 +68,7 @@ def create_ikernel_tab_modal(tab_name):
                 dbc.ModalBody([
                     html.Img(
                         id='{}_modal_img'.format(tab_name),
-                        src=asset_url+"figures/"+init_date.strftime('%Y_%m_%d')+"/interaction_kernel.png",
+                        src = asset_url + get_assets_datadir(dt(init_date.year, init_date.month, init_date.day)) + "/interaction_kernel.png",
                         style={'width': '100%', 'height': '100%'},
                     ),
                 ]),
@@ -99,7 +99,7 @@ def create_ikernel_tab(tab_name, tooltip):
                             children=[
                                 html.Img(
                                     id='{}_img'.format(tab_name),
-                                    src=asset_url + "figures/" + init_date.strftime('%Y_%m_%d') + "/interaction_kernel.png",
+                                    src = asset_url + get_assets_datadir(dt(init_date.year, init_date.month, init_date.day)) + "/interaction_kernel.png",
                                     style={'width': '100%', 'height': '100%'},
                                 ),
                             ],

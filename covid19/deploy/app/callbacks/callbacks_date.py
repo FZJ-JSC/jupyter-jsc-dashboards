@@ -89,7 +89,7 @@ def update_rki_map(date):
 def get_ikernel_img_url(assets_dir):
     imgUrl = ""
     if assets_dir is not None:
-        imgUrl = "figures/" + assets_dir + "interaction_kernel.png"
+        imgUrl = get_assets_datadir(dt.strptime(assets_dir, '%Y_%m_%d/')) + "/interaction_kernel.png"
     if not os.path.isfile("assets/" + imgUrl): 
         imgUrl = "placeholders/plot_not_found.png"
     imgUrl = asset_url + imgUrl
