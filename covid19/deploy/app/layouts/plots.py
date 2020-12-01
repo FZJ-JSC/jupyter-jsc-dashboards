@@ -5,7 +5,7 @@ import dash_html_components as html
 from plotly_figures.curves import *
 
 
-def create_plot_modal(type_):
+def create_plot_modal(type_, title):
     return html.Div([
         dbc.Button(
             "Vergrößern", 
@@ -17,7 +17,7 @@ def create_plot_modal(type_):
             id='{}_modal'.format(type_),
             size='xl',
             children=[
-                dbc.ModalHeader(type_),
+                dbc.ModalHeader(title),
                 dbc.ModalBody( 
                     id='{}_modal_img'.format(type_),
                 ),
@@ -32,7 +32,7 @@ def create_plot_modal(type_):
     ]) 
 
 
-def create_plot_tab(type_, tooltip):
+def create_plot_tab(type_, title, tooltip):
     return dbc.Card(
         outline=True,
         color='light',
@@ -42,7 +42,7 @@ def create_plot_tab(type_, tooltip):
                 html.Div(
                     id='{}_img_div'.format(type_),
                     children=[
-                        create_plot_modal(type_),
+                        create_plot_modal(type_, title),
                         dcc.Loading(
                             id='{}_loading_img'.format(type_), 
                             children=[
@@ -72,12 +72,12 @@ def create_plot_tab(type_, tooltip):
 # Geglättet
 with open('txt/plot_tooltip_trend.md') as md_file:
     geglaettet_tab_tooltip = md_file.read()
-geglaettet_tab_left = create_plot_tab('geglaettet_left', geglaettet_tab_tooltip)
-geglaettet_tab_right = create_plot_tab('geglaettet_right', geglaettet_tab_tooltip)
+geglaettet_tab_left = create_plot_tab('geglaettet_left', 'geglättet', geglaettet_tab_tooltip)
+geglaettet_tab_right = create_plot_tab('geglaettet_right', 'geglättet', geglaettet_tab_tooltip)
 
 
 # Ungeglättet
 with open('txt/plot_tooltip_raw.md') as md_file:
     ungeglaettet_tab_tooltip = md_file.read()
-ungeglaettet_tab_left = create_plot_tab('ungeglaettet_left', ungeglaettet_tab_tooltip)
-ungeglaettet_tab_right = create_plot_tab('ungeglaettet_right', ungeglaettet_tab_tooltip)
+ungeglaettet_tab_left = create_plot_tab('ungeglaettet_left', 'ungeglättet', ungeglaettet_tab_tooltip)
+ungeglaettet_tab_right = create_plot_tab('ungeglaettet_right', 'ungeglättet', ungeglaettet_tab_tooltip)
