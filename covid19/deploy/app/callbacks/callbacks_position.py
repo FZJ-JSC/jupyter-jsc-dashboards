@@ -5,7 +5,8 @@ import os
 import pandas as pd
 
 from app import app, asset_url, counties_metadf, init_countyid
-from app import fixed_plot_width, fixed_plot_height
+from app import fixed_plot_width, fixed_plot_height, threshold_date
+from app import get_assets_datadir
 from callbacks.logging import setup_logger
 from dash.dependencies import Input, Output
 from datetime import datetime as dt, timedelta
@@ -47,41 +48,44 @@ def update_mapclick(choro1_click, choro2_click):
 
 # Callback plots
 def update_plot(value, assets_dir, column_dict):
-    threshhold_date = os.getenv('THRESHHOLD_DATE')    
-    if threshhold_date is not None:
-        threshhold_date = dt.strptime(threshhold_date, '%Y_%m_%d')
-        selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
-        if selected_date <= threshhold_date:
-            assets_dir = (selected_date - timedelta(days=25)).strftime('%Y_%m_%d') + "/"
-            img_path = "figures/" + assets_dir + "curve_trend_{0:05d}.png".format(value)
+    print("update_plots(): {}".format(assets_dir))
+    selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
+    assets_datadir = get_assets_datadir(selected_date)
+
+    if (threshold_date is not None) and (selected_date <= threshold_date):
+            if column_dict['mean']['column'] == 'Trend Prediction Mean':
+                img_path = assets_datadir + "curve_trend_{0:05d}.png".format(value)
+            else:
+                img_path = assets_datadir + "curve_{0:05d}.png".format(value)
+            print(img_path)
             logger.debug("Update plot: Looking for {}".format(img_path))
             if os.path.isfile(os.path.join('assets', img_path)):
                 img = html.Img(
-                    src=asset_url+img_path,
-                    style={'width': '100%', 'height': '100%'},
+                    src = asset_url + img_path,
+                    style = {'width': '100%', 'height': '100%'},
                 )
             else:
                 img = html.Img(
-                    src=asset_url+"placeholders/plot_not_found.png",
-                    style={'width': '100%', 'height': '100%'},
+                    src = asset_url + "placeholders/plot_not_found.png",
+                    style = {'width': '100%', 'height': '100%'},
                 )
                 logger.debug("Could not find {}. Falling back to {}".format(
                     img_path, asset_url+"placeholders/plot_not_found.png"))
             return img, img
-    
+
     try:
-        logger.debug("Update plot: Looking for assets/csv/{0}{1:05d}.csv".format(
-            assets_dir, value))
-        df_curve = pd.read_csv('assets/csv/{0}{1:05d}.csv'.format(assets_dir, value))
+        logger.debug("Update plot: Looking for assets/{0}{1:05d}.csv".format(
+            assets_datadir, value))
+        df_curve = pd.read_csv('assets/{0}{1:05d}.csv'.format(assets_datadir, value))
     except FileNotFoundError:
         img = html.Img(
-            src=asset_url+"placeholders/plot_not_found.png",
-            style={'width': '100%', 'height': '100%'},
+            src = asset_url + "placeholders/plot_not_found.png",
+            style = {'width': '100%', 'height': '100%'},
         )
-        logger.debug("Could not find assets/csv/{0}{1:05d}.csv. Falling back to {2}".format(
-            assets_dir, value, asset_url+"placeholders/plot_not_found.png"))
+        logger.debug("Could not find assets/{0}{1:05d}.csv. Falling back to {2}".format(
+            assets_datadir, value, asset_url + "placeholders/plot_not_found.png"))
         return img, img
-    
+
     fig = curves.plotit(df_curve, column_dict)
     fig_fixedrange = curves.plotit(df_curve, column_dict, fixedrange=True,)
     curves.minimize(fig_fixedrange, width=fixed_plot_width, height=fixed_plot_height)
@@ -144,13 +148,14 @@ def update_ungeglaettet_left_img(value, assets_dir):
 def update_ungeglaettet_right_img(value, assets_dir):
     return update_plot(value, assets_dir, curves.column_dict_raw)
 
-    
+
 # Callbacks meta-information
 def update_pos_txt(value, assets_dir):
     msg = " "
     if value is not None:
         try:
-            mdat = pd.read_csv("./assets/figures/" + assets_dir + "/metadata.csv")
+            assets_datadir = get_assets_datadir(dt.strptime(assets_dir, '%Y_%m_%d'))
+            mdat = pd.read_csv("./" + assets_datadir + "/metadata.csv")
             msg = mdat.loc[mdat['countyID'] == value]['probText'].to_string(index=False)
             try:
                 val = float(msg)
