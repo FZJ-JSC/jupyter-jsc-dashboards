@@ -26,6 +26,7 @@ def create_depiction_toggle(toggle_name):
                     id=f"{toggle_name}_7_days_button2"
                 )]
         ),
+        html.Br(),
         dbc.ButtonGroup(
             id=f"{toggle_name}_100k",
             className="mt-2",
