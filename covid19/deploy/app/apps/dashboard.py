@@ -8,18 +8,22 @@ from layouts.tabs_map import bstim_map_tab_left, rki_map_tab_left
 from layouts.tabs_map import bstim_map_tab_right, rki_map_tab_right
 from layouts.tabs_ikernel import ikernel_inter1_modal, ikernel_inter2_modal, ikernel_inter3_modal
 from layouts.tabs_ikernel import ikernel_tab_left, ikernel_tab_right
+from layouts.controls import date_picker_left, date_picker_right
+from layouts.controls import toggle_left, toggle_right
+from layouts.controls import pos_controls_left, pos_controls_right
 from layouts.plots import geglaettet_tab_left, ungeglaettet_tab_left
 from layouts.plots import geglaettet_tab_right, ungeglaettet_tab_right
-from layouts.date_picker import date_picker_left, date_picker_right
-from layouts.position_controls import pos_controls_left, pos_controls_right
 
 
 tab_height = '5vh'
 
+
 with open('assets/warning.txt') as txt_file:
     warning_txt = txt_file.read()
 
+
 body_layout = dbc.Container(
+    id="body",
     style={'marginTop': 100, 'marginBottom': 20},
     children=[
         #####################
@@ -96,9 +100,14 @@ body_layout = dbc.Container(
                 },
                 children=[explanations_right]),
         ]),
+        
+        #####################
+        # Visual divider
+        #####################        
+        html.Hr(),
 
         #####################
-        # Maps and interaction kernel Section
+        # Maps and interaction kernel section
         #####################
         ikernel_inter1_modal,
         ikernel_inter2_modal,
@@ -114,10 +123,10 @@ body_layout = dbc.Container(
                     },
                     body=True,   
                     children=[
-                        # --- Zeitangabe  ---
-                        dbc.CardHeader(
+                        dbc.CardHeader([
+                            toggle_left,
                             date_picker_left,
-                        ),
+                        ]),
                         dbc.CardBody(
                             className='mt-3',
                             children=[
@@ -127,55 +136,51 @@ body_layout = dbc.Container(
                                         children=[
                                             dbc.Tab(
                                                 rki_map_tab_left, 
-                                                label="Meldedaten RKI", 
-                                                style={'padding': '0', 'height': '450px'}),
+                                                label="Meldedaten RKI",
+                                            ),
                                             dbc.Tab(
                                                 bstim_map_tab_left, 
-                                                label="Nowcast BSTIM", 
-                                                style={'padding': '0', 'height': '450px'}),
+                                                label="Nowcast BSTIM",
+                                            ),
                                             dbc.Tab(
                                                 ikernel_tab_left,
-                                                label="Interaktionskernel", 
-                                                style={'padding': '0', 'height': '450px'}),
+                                                label="Interaktionskernel",
+                                            )
                                         ]),
                                 html.P(
                                     id='card_separator_left',
                                     className='card-text',
-                                ),       
-                                # Ortsangabe
-                                dbc.Card(
-                                    style={
-                                        'margin': '0% 0% 0% 0%', # top, right, bottom, left
-                                        'padding': '0',
-                                    },
-                                    children=[
-                                        dbc.CardHeader(
-                                            pos_controls_left,
-                                        ),
-                                        dbc.CardBody(
-                                            className='mt-3',
+                                ),
+                            ]),
+                        # Ortsangabe
+                        dbc.CardHeader(
+                            pos_controls_left,
+                            style={'border-top': '1px solid rgba(0,0,0,.125)'}
+                        ),
+                        dbc.CardBody(
+                            className='mt-3',
+                            children=[
+                                dbc.Tabs(
+                                    id='pos_card_left_tabs',
+                                    active_tab='tab-0',
                                             children=[
-                                                dbc.Tabs(
-                                                    id='pos_card_left_tabs',
-                                                    active_tab='tab-0',
-                                                            children=[
-                                                                dbc.Tab(
-                                                                    geglaettet_tab_left,
-                                                                    label="geglättet",
-                                                                    style={'padding': '0'} # height': '450px'}
-                                                                ), 
-                                                                dbc.Tab(
-                                                                    ungeglaettet_tab_left,
-                                                                    label="ungeglättet",
-                                                                    style={'padding': '0'} # height': '450px'}
-                                                                ),
-                                                            ]),
-                                                html.P(
-                                                    id='pos_card_left_content',
-                                                    className="card-text",
+                                                dbc.Tab(
+                                                    geglaettet_tab_left,
+                                                    id="geglaettet_tab_left",
+                                                    label="geglättet",
+                                                    style={'padding': '0'} # height': '450px'}
+                                                ),
+                                                dbc.Tab(
+                                                    ungeglaettet_tab_left,
+                                                    id="ungeglaettet_tab_left",
+                                                    label="ungeglättet",
+                                                    style={'padding': '0'} # height': '450px'}
                                                 ),
                                             ]),
-                                    ]),
+                                html.P(
+                                    id='pos_card_left_content',
+                                    className="card-text",
+                                ),
                             ]),
                     ]),
             ]),
@@ -189,9 +194,10 @@ body_layout = dbc.Container(
                     body=True,
                     children=[
                         # --- Zeitangabe  ---
-                        dbc.CardHeader(
+                        dbc.CardHeader([
+                            toggle_right,
                             date_picker_right,
-                        ),
+                        ]),
                         dbc.CardBody(
                             className='mt-3',
                             children=[
@@ -200,56 +206,52 @@ body_layout = dbc.Container(
                                     active_tab='tab-1',
                                         children=[
                                             dbc.Tab(
-                                                rki_map_tab_right, 
-                                                label="Meldedaten RKI", 
-                                                style={'padding': '0', 'height': '450px'}),
+                                                rki_map_tab_right,
+                                                label="Meldedaten RKI",
+                                            ),
                                             dbc.Tab(
-                                                bstim_map_tab_right, 
-                                                label="Nowcast BSTIM", 
-                                                style={'padding': '0', 'height': '450px'}),
+                                                bstim_map_tab_right,
+                                                label="Nowcast BSTIM",
+                                            ),
                                             dbc.Tab(
-                                                ikernel_tab_right, 
-                                                label="Interaktionskernel", 
-                                                style={'padding': '0', 'height': '450px'}),
+                                                ikernel_tab_right,
+                                                label="Interaktionskernel",
+                                            ),
                                         ]),
                                 html.P(
                                     id='card_separator_right',
                                     className='card-text',
                                 ),
-                                # Ortsangabe
-                                dbc.Card(
-                                    style={
-                                        'margin': '0% 0% 0% 0%', # top, right, bottom, left
-                                        'padding': '0',
-                                    },
-                                    children=[
-                                        dbc.CardHeader(
-                                            pos_controls_right,
-                                        ),
-                                        dbc.CardBody(
-                                            className='mt-3',
+                            ]),
+                        # Ortsangabe
+                        dbc.CardHeader(
+                            pos_controls_right,
+                            style={'border-top': '1px solid rgba(0,0,0,.125)'}
+                        ),
+                        dbc.CardBody(
+                            className='mt-3',
+                            children=[
+                                dbc.Tabs(
+                                    id='pos_card_right_tabs',
+                                    active_tab='tab-0',
                                             children=[
-                                                dbc.Tabs(
-                                                    id='pos_card_right_tabs',
-                                                    active_tab='tab-0',
-                                                            children=[
-                                                                dbc.Tab(
-                                                                    geglaettet_tab_right, 
-                                                                    label="geglättet",    
-                                                                    style={'padding': '0'} # height': '450px'}
-                                                                ), 
-                                                                dbc.Tab(
-                                                                    ungeglaettet_tab_right, 
-                                                                    label="ungeglättet",  
-                                                                    style={'padding': '0'} # height': '450px'}
-                                                                ),
-                                                            ]),
-                                                html.P(
-                                                    id='pos_card_right_content',
-                                                    className="card-text",
+                                                dbc.Tab(
+                                                    geglaettet_tab_right,
+                                                    id="geglaettet_tab_right",
+                                                    label="geglättet",
+                                                    style={'padding': '0'} # height': '450px'}
+                                                ), 
+                                                dbc.Tab(
+                                                    ungeglaettet_tab_right,
+                                                    id="ungeglaettet_tab_right",
+                                                    label="ungeglättet",
+                                                    style={'padding': '0'} # height': '450px'}
                                                 ),
                                             ]),
-                                    ]),
+                                html.P(
+                                    id='pos_card_right_content',
+                                    className="card-text",
+                                ),
                             ]),
                     ]),
             ]),

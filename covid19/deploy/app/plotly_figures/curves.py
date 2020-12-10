@@ -7,6 +7,10 @@ from datetime import datetime
 locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
 
 column_dict_raw = {
+    'rki': {
+        'column': 'RKI Meldedaten',
+        'color': 'black',
+    },
     'mean': {
         'column': 'Raw Prediction Mean',
         'color': 'rgb(213,94,0)',
@@ -35,7 +39,15 @@ column_dict_raw = {
     }
 }
 
+column_dict_raw_100k = column_dict_raw.copy()
+column_dict_raw_100k['mean']['column'] += '100k'
+
+
 column_dict_trend = {
+    'rki': {
+        'column': 'RKI Meldedaten',
+        'color': 'black',
+    },
     'mean': {
         'column': 'Trend Prediction Mean',
         'color': 'rgb(0,100,80)',
@@ -64,9 +76,17 @@ column_dict_trend = {
     }
 }
 
+column_dict_trend_100k = column_dict_trend.copy()
+column_dict_trend_100k['mean']['column'] += '100k'
+
+
 column_dict_7days = {
+    'rki': {
+        'column': 'RKI 7Day Incidence',
+        'color': 'black',
+    },
     'mean': {
-        'column': 'Trend 7Week Prediction Mean100k',
+        'column': 'Trend 7Week Prediction Mean',
         'color': 'rgb(0,100,80)',
     },
     'q5': {
@@ -93,6 +113,9 @@ column_dict_7days = {
     }
 }
 
+column_dict_7days_100k = column_dict_7days.copy()
+column_dict_7days_100k['mean']['column'] += '100k'
+
 
 def create_figure_from_df(df, column_dict, rki=True):
     # Create figure
@@ -102,19 +125,21 @@ def create_figure_from_df(df, column_dict, rki=True):
 
     # Filled quantils
     # Append reversed q95 column to q5 column
-    y5_95 = df[column_dict['q5']['column']].append(df[column_dict['q95']['column']][::-1])
+    y5_95 = df[column_dict['q5']['column']].append(
+        df[column_dict['q95']['column']][::-1])
     fig.add_trace(go.Scatter(
-        name='5%-95%-Quantil',    
-        x=x_data.append(x_data[::-1]), 
+        name='5%-95%-Quantil',
+        x=x_data.append(x_data[::-1]),
         y=y5_95,
         fill='toself',
         fillcolor=column_dict['q5q95']['fill_color'],
         line_color='rgba(255,255,255,0)',
     ))
     # Append reversed q75 column to q25 column
-    y25_75 = df[column_dict['q25']['column']].append(df[column_dict['q75']['column']][::-1])
+    y25_75 = df[column_dict['q25']['column']].append(
+        df[column_dict['q75']['column']][::-1])
     fig.add_trace(go.Scatter(
-        name='25%-75%-Quantil',    
+        name='25%-75%-Quantil',
         x=x_data.append(x_data[::-1]),
         y=y25_75,
         fill='toself',
@@ -137,7 +162,7 @@ def create_figure_from_df(df, column_dict, rki=True):
 
     # Model line
     fig.add_trace(go.Scatter(
-        name='Modell',    
+        name='Modell',
         x=x_data, y=df[column_dict['mean']['column']],
         line_color=column_dict['mean']['color'],
     ))
@@ -146,29 +171,28 @@ def create_figure_from_df(df, column_dict, rki=True):
         # RKI scatter points
         fig.add_trace(go.Scatter(
             name='Daten RKI',
-            x=x_data, y=df['RKI Meldedaten'],
+            x=x_data, y=df[column_dict['rki']['column']],
             mode='markers',
-            marker=dict(color="black", size=6)
+            marker=dict(
+                color=column_dict['rki']['color'],
+                size=6)
         ))
 
     return fig
 
 
 def update_layout(fig, fixedrange=False,
-                  skip_first_7=False,
                   color_legend='rgb(229, 236, 246)', 
                   color_forecast='rgb(24, 145, 255)', 
                   color_nowcast='rgb(136, 207, 250)'):
     # Find y_max from q95 column data
-    if skip_first_7:
-        y_max = max(fig.data[5]['y'][7:])
-    else:
-        y_max = max(fig.data[5]['y'])
+    y_range_list = [value for value in fig.data[5]['y'] if not pd.isna(value)]
+    y_max = max(y_range_list)
     x_data = fig.data[-1]['x']
     x_labels = []
     # Create x-axis labels
     for i, date in enumerate(x_data):
-        if i % 5 == 0:
+        if i % 7 == 0:
             date = datetime.strptime(date, '%Y-%m-%d')
             x_labels.append(date.strftime('%d.%m.%Y'))
         else:
@@ -176,9 +200,9 @@ def update_layout(fig, fixedrange=False,
     for i in [-10, -6, -1]:
         # Reformat date string
         date = datetime.strptime(x_data[i], '%Y-%m-%d').strftime('%d.%m.%Y<br>%A')
-        if i == -6: # Day before forecast date: with weekday and red
+        if i == -6:  # Day before forecast date: with weekday and red
             x_labels[i] = "<span style='color:red'><b>" + date + "</b></span>"
-        else: # Nowcast and last date with weekday
+        else:  # Nowcast and last date with weekday
             x_labels[i] = "<b>" + date + "</b>"
 
     # Update layout and legend
@@ -211,7 +235,6 @@ def update_layout(fig, fixedrange=False,
         title="Fallzahlen/Tag nach Meldedatum",
         autorange=False,
         range=[-5, y_max],
-#         dtick=20, # 10
         fixedrange=fixedrange  # Disable zooming
     )
 
@@ -274,7 +297,6 @@ def minimize(fig, height=None, width=None):
     fig.update_shapes(
         line=dict(width=2),
     )
-    y_max = max(fig.data[5]['y'])
     fig.update_annotations(
         font=dict(size=font_size),
         borderwidth=0.5
@@ -286,14 +308,12 @@ def minimize(fig, height=None, width=None):
 
 
 def plotit(df, column_dict, rki=True, 
-           skip_first_7=False,
            fixedrange=False,
            color_legend='rgb(229, 236, 246)', 
            color_forecast='rgb(24, 145, 255)', 
            color_nowcast='rgb(136, 207, 250)'):
     fig = create_figure_from_df(df, column_dict)
     return update_layout(fig, 
-                         skip_first_7=skip_first_7,
                          fixedrange=fixedrange,
                          color_legend=color_legend,
                          color_forecast=color_forecast,

@@ -8,27 +8,35 @@ from dash.dependencies import Input, Output, State
 
 with open('txt/bstim_covid19.md') as md_file:
     bstim_covid19_md = md_file.read()
+    index = bstim_covid19_md.find('\n')
+    bstim_covid19_title = bstim_covid19_md[:index]
+    bstim_covid19_text = bstim_covid19_md[index:]
+    
 with open('txt/disclaimer.md') as md_file:
     disclaimer_md = md_file.read()
     
 
 # BSTIM
 explanations_bstim = html.Div([
-    dcc.Markdown(bstim_covid19_md),
-    html.Span(
-        dbc.Button(
-            "Disclaimer", 
-            id='disclaimer_modal_open', 
-            outline=True, 
-            color='secondary', 
-            className='mt-0'
+    html.Hr(),
+    dbc.Row([
+        dcc.Markdown(
+            bstim_covid19_title,
+            className='pt-1',
         ),
-        style={
-            'float': 'right',
-            'marginTop': 0,
-            'marginBottom': 10,
-        },
+        dbc.Button(
+                "Disclaimer", 
+                id='disclaimer_modal_open', 
+                outline=True, 
+                color='secondary', 
+                className='mt-0'
+        )],
+        align="center",
+        justify="between",
+        style={'margin': 0},
     ),
+    html.Hr(),
+    dcc.Markdown(bstim_covid19_text),
     dbc.Modal(
         id='disclaimer_modal',
         size='xl',
@@ -60,13 +68,23 @@ explanations_bstim = html.Div([
 
 # Vorhersage und Analyse
 explanations_right = html.Div([
-    dcc.Markdown(
-        f"""
-        -----
-        #####  Wie funktioniert die Vorhersage und Analyse
-        -----
-        """
+    html.Hr(),
+    dbc.Row(
+        dcc.Markdown(
+            "#####  Wie funktioniert die Vorhersage und Analyse",
+            className='pt-1',
+        ),
+        align="center",
+        style={'height': '38px', 'margin': 0},
     ),
+    html.Hr(),
+#     dcc.Markdown(
+#         f"""
+#         -----
+#         #####  Wie funktioniert die Vorhersage und Analyse
+#         -----
+#         """
+#     ),
     html.Div(
         style={
             'width': '100%',

@@ -5,34 +5,56 @@ import dash_html_components as html
 from plotly_figures.curves import *
 
 
-def create_plot_modal(type_, title):
-    return html.Div([
+def create_plot_modal_and_tooltip(component_name, title, tooltip):
+    return dbc.Row([
+        # Modal
         dbc.Button(
-            "Vergrößern", 
-            id='{}_modal_open'.format(type_), 
+            html.Span([
+                html.I(className="fa fa-search-plus mr-2"),
+                "Vergrößern",
+            ]),
+            id=f"{component_name}_modal_open", 
             outline=True, 
             color='secondary', 
             className='mr-1'),
         dbc.Modal(
-            id='{}_modal'.format(type_),
+            id=f"{component_name}_modal",
             size='xl',
             children=[
                 dbc.ModalHeader(title),
-                dbc.ModalBody( 
-                    id='{}_modal_img'.format(type_),
+                dbc.ModalBody(
+                    id=f"{component_name}_modal_img",
                 ),
                 dbc.ModalFooter(
                     dbc.Button(
                         "Schließen", 
-                        id='{}_modal_close'.format(type_), 
-                        className='ml-auto')
+                        id=f"{component_name}_modal_close", 
+                        className='ml-auto'
+                    )
                 ),
             ]
-        ),   
+        ),
+        # Tooltip
+        html.I(
+            className="fa fa-question-circle fa-lg mr-2",
+            id=f"{component_name}_target",
+            style={
+                'color':'var(--secondary)',
+                'align-self': 'center'
+            },
+        ),
+        dbc.Tooltip(
+            tooltip, 
+            target=f"{component_name}_target", 
+            style = {
+                'maxWidth': 600,
+                'width': 600
+                }
+        )
     ]) 
 
 
-def create_plot_tab(type_, title, tooltip):
+def create_plot_tab(component_name, title, tooltip):
     return dbc.Card(
         outline=True,
         color='light',
@@ -40,13 +62,13 @@ def create_plot_tab(type_, title, tooltip):
         children=[ 
             dbc.CardBody([
                 html.Div(
-                    id='{}_img_div'.format(type_),
+                    id=f"{component_name}_img_div",
                     children=[
-                        create_plot_modal(type_, title),
+                        create_plot_modal_and_tooltip(component_name, title, tooltip),
                         dcc.Loading(
-                            id='{}_loading_img'.format(type_), 
+                            id=f"{component_name}_loading_img", 
                             children=[
-                                html.Div(id='{}_img'.format(type_)),
+                                html.Div(id=f"{component_name}_img"),
                             ],
                             type='circle', # 'graph', 'cube', 'circle', 'dot', 'default'
                             color='#343A40',
@@ -54,15 +76,9 @@ def create_plot_tab(type_, title, tooltip):
                         ),  
                         html.Div(
                             dcc.Markdown(
-                                id='{}_txt'.format(type_),
+                                id=f"{component_name}_txt",
                                 children=[''],
                             )
-                        ),
-                        dbc.Tooltip(
-                            tooltip,
-                            target='{}_img'.format(type_),
-                            style={'width': '600px'},
-                            placement='left',
                         ),
                     ]),
             ]),

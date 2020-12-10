@@ -1,6 +1,5 @@
------
-#####  BSTIM-Covid19 
------
+#####  BSTIM-Covid19
+
 Aktuelle Daten und Vorhersage der täglich gemeldeten Neuinfektionen mit COVID-19 für Landkreise in Deutschland.
 Das Model beschreibt die zeitliche Entwicklung der Neuinfektionen in einen Zeitraum von mehreren Wochen.
 Es betrachtet dazu nicht nur die wahrscheinlichste Entwicklung oder die mittlere Entwicklung, sondern schätzt die Wahrscheinlichkeit für verschiedene Szenarien ab, die mit der aktuellen Datenlage kompatibel sind.

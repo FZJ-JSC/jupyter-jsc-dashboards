@@ -68,10 +68,15 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
 
 
 def create_map_figure(counties_geojson, counties_metadf,
-                      mapcsv_path, column, 
+                      mapcsv_path, column,
+                      normed_to_100k=True,
                       width=None, height=None, zmax=100):
     counties_infectionsdf = create_dynamic_map_data(counties_geojson, mapcsv_path, column)
-    
+
+    colorbar_text = "Neuinfektionen pro 100.000 Einwohner und Tag"
+    if not normed_to_100k:
+        colorbar_text = "Neuinfektionen pro Einwohner und Tag"
+
     fig = go.Figure(
         go.Choroplethmapbox(
             geojson=counties_geojson,
@@ -87,7 +92,7 @@ def create_map_figure(counties_geojson, counties_metadf,
                 thickness=20, 
                 ticklen=3, 
                 title=dict(
-                    text="Neuinfektionen pro 100.000 Einwohner und Tag", 
+                    text=colorbar_text,
                     side='right'
                 )
             ),
@@ -101,7 +106,7 @@ def create_map_figure(counties_geojson, counties_metadf,
                 "<extra></extra>",
         )
     ) 
-    
+
     # Set width and height.
     if width:
         fig.update_layout(width=width)
