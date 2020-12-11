@@ -86,6 +86,16 @@ def create_position_controls(position_control_name):
             for index, row in metadata.iterrows()
         ]
     ),
+    html.A(
+        children=[
+            html.I(className='fa fa-download mr-2'),
+            'CSV Datei'],
+        id=f"{position_control_name}_download",
+        download="",
+        href="",
+        target="_blank",
+        className="btn btn-primary mt-2"
+    ),
 ])
 
 
