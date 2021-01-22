@@ -14,7 +14,8 @@ def create_plot_modal_and_tooltip(component_name, title, tooltip):
                 "Vergrößern",
             ]),
             id=f"{component_name}_modal_open", 
-            outline=True, 
+            outline=True,
+            size='sm',
             color='secondary', 
             className='mr-1'),
         dbc.Modal(
@@ -49,7 +50,7 @@ def create_plot_modal_and_tooltip(component_name, title, tooltip):
             style = {
                 'maxWidth': 600,
                 'width': 600
-                }
+            }
         )
     ]) 
 
@@ -81,7 +82,7 @@ def create_plot_tab(component_name, title, tooltip):
                             )
                         ),
                     ]),
-            ]),
+            ])
         ])
 
 

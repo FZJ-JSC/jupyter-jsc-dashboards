@@ -16,12 +16,16 @@ from plotly_figures import curves
 logger = setup_logger()
 
 
-def update_plot(value, assets_dir, column_dict):
-    selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
+def update_plot(value, selected_date, column_dict, smaller_threshold=False):
+#     selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
     assets_datadir = get_assets_datadir(selected_date)
+    placeholder_img = html.Img(
+        src=asset_url + "placeholders/plot_not_found.png",
+        style={'width': '100%', 'height': '100%'},
+    )
 
-    if (threshold_date is not None) and (selected_date <= threshold_date):
-        if column_dict['mean']['column'] == 'Trend Prediction Mean':
+    if smaller_threshold:
+        if 'Trend' in column_dict['mean']['column']:
             img_path = assets_datadir + "curve_trend_{0:05d}.png".format(value)
         else:
             img_path = assets_datadir + "curve_{0:05d}.png".format(value)
@@ -32,10 +36,7 @@ def update_plot(value, assets_dir, column_dict):
                 style={'width': '100%', 'height': '100%'},
             )
         else:
-            img = html.Img(
-                src=asset_url + "placeholders/plot_not_found.png",
-                style={'width': '100%', 'height': '100%'},
-            )
+            img = placeholder_img
             logger.debug("Could not find {}. Falling back to {}".format(
                 img_path, asset_url+"placeholders/plot_not_found.png"))
         return img, img
@@ -45,17 +46,16 @@ def update_plot(value, assets_dir, column_dict):
             assets_datadir, value))
         df_curve = pd.read_csv('assets/{0}{1:05d}.csv'.format(assets_datadir, value))       
     except FileNotFoundError:
-        img = html.Img(
-            src=asset_url + "placeholders/plot_not_found.png",
-            style={'width': '100%', 'height': '100%'},
-        )
         logger.debug("Could not find assets/{0}{1:05d}.csv. Falling back to {2}".format(
             assets_datadir, value, asset_url + "placeholders/plot_not_found.png"))
-        return img, img
+        return placeholder_img, placeholder_img
 
+#     try:
     fig = curves.plotit(df_curve, column_dict)
     fig_fixedrange = curves.plotit(df_curve, column_dict, fixedrange=True,)
     curves.minimize(fig_fixedrange, width=fixed_plot_width, height=fixed_plot_height)
+#     except KeyError:
+#         return placeholder_img, placeholder_img
 
     graph_small = dcc.Graph(
         figure=fig_fixedrange,
@@ -152,17 +152,23 @@ for side in ['left', 'right']:
     )
     def update_geglaettet(value, btn_color_7_days, btn_color_100k,
                           assets_dir, current_active_tab):
+        selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
+        if (threshold_date is not None) and (selected_date <= threshold_date):
+            plots = update_plot(value, selected_date, curves.column_dict_trend, 
+                                smaller_threshold=True)
+            return plots + (False, current_active_tab)
+
         if btn_color_7_days == 'primary':  # 7 day incidence is selected
             if btn_color_100k == 'primary':  # 100k is selected
-                plots = update_plot(value, assets_dir, curves.column_dict_7days_100k)
+                plots = update_plot(value, selected_date, curves.column_dict_7days_100k)
             else:
-                plots = update_plot(value, assets_dir, curves.column_dict_7days)
+                plots = update_plot(value, selected_date, curves.column_dict_7days)
             return plots + (True, 'tab-0')  # Disable 2nd tab and switch to 1st
 
         if btn_color_100k == 'primary':  # 100k is selected
-            plots = update_plot(value, assets_dir, curves.column_dict_trend_100k)
+            plots = update_plot(value, selected_date, curves.column_dict_trend_100k)
         else:
-            plots = update_plot(value, assets_dir, curves.column_dict_trend)
+            plots = update_plot(value, selected_date, curves.column_dict_trend)
         return plots + (False, current_active_tab)  # Enable 2nd tab
 
     # Plots ungeglaettet
@@ -174,10 +180,16 @@ for side in ['left', 'right']:
          Input(f"date_picker_{side}_output_container", 'children')]
     )
     def update_ungeglaettet(value, btn_color_100k, assets_dir):
+        selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
+        if (threshold_date is not None) and (selected_date <= threshold_date):
+            plots = update_plot(value, selected_date, curves.column_dict_raw,
+                                smaller_threshold=True)
+            return plots
+
         if btn_color_100k == 'primary':  # 100k is selected
-            plots = update_plot(value, assets_dir, curves.column_dict_raw_100k)
+            plots = update_plot(value, selected_date, curves.column_dict_raw_100k)
         else:
-            plots = update_plot(value, assets_dir, curves.column_dict_raw)
+            plots = update_plot(value, selected_date, curves.column_dict_raw)
         return plots
 
     # Update meta-information

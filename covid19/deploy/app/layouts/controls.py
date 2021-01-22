@@ -8,56 +8,97 @@ from datetime import timedelta
 
 
 def create_depiction_toggle(toggle_name):
-    return dbc.FormGroup([
-        dbc.Label(
-            id=f"{toggle_name}_label",
-            children=["Darstellung:"],
-        ),
-        html.Br(),
-        dbc.ButtonGroup(
-            id=f"{toggle_name}_7_days",
-            children=[
-                dbc.Button(
-                    "7 Tage Inzidenz",
-                    id=f"{toggle_name}_7_days_button1"
-                ), 
-                dbc.Button(
-                    "Neuinfektionen",
-                    id=f"{toggle_name}_7_days_button2"
-                )]
-        ),
-        html.Br(),
-        dbc.ButtonGroup(
-            id=f"{toggle_name}_100k",
-            className="mt-2",
-            children=[
-                dbc.Button(
-                    "per 100.000",
-                    id=f"{toggle_name}_100k_button1"
-                ), 
-                dbc.Button(
-                    "Absolut",
-                    id=f"{toggle_name}_100k_button2"
-                )]
-        ),
-    ])
-
+    return html.Div(
+        id=f"{toggle_name}",
+        children = [
+            dbc.Row(
+                id=f"{toggle_name}_toggle_buttons",
+                children=[
+                    dbc.Col(
+                        dbc.ButtonGroup(
+                            id=f"{toggle_name}_7_days",
+                            children=[
+                                dbc.Button(
+                                    "7-Tage-Inzidenz",
+                                    id=f"{toggle_name}_7_days_button1",
+                                    outline=True,
+                                    className="toggle-btn col-6"
+                                ),
+                                dbc.Button(
+                                    "Neuinfektionen des Tages",
+                                    id=f"{toggle_name}_7_days_button2",
+                                    outline=True,
+                                    className="toggle-btn col-6"
+                                )],
+                            size='sm',
+                            style={'width': '100%'}
+                        ),
+                        width=12
+                    ),
+        #         ),
+        #         dbc.Row(
+                    dbc.Col(
+        #                 dbc.Collapse(
+                            dbc.ButtonGroup(
+                                id=f"{toggle_name}_100k",
+                                children=[
+                                    dbc.Button(
+                                        "pro 100.000",
+                                        id=f"{toggle_name}_100k_button1",
+                                        outline=True,
+                                        className="toggle-btn col-6"
+                                    ), 
+                                    dbc.Button(
+                                        "absolut",
+                                        id=f"{toggle_name}_100k_button2",
+                                        outline=True,
+                                        className="toggle-btn col-6"
+                                    )],
+                                size='sm',
+                                className="mr-2 mt-2",
+                                style={'width': '100%'}
+                            ),
+        #                     id=f"{toggle_name}_collapse",
+        #                 ),
+        #                 width={"size": 7, "offset": 5},
+                        width=12
+                    )
+                ],
+                style={'display': 'flex'}
+            ),
+            html.Div(
+                dbc.FormText(
+                    id=f"{toggle_name}_no_toggle_text",
+                    children=[
+                        html.Center("Neuinfektionen des Tages pro 100.000 Einwohner")
+                    ],
+                    color="secondary",
+                    style={'display': 'none'}
+                ),
+                style={'width': '100%'}
+            )
+        ])
 
 def create_date_picker(date_picker_name):
     return dbc.FormGroup([
         dbc.Label(
             id=f"{date_picker_name}_label",
             children=["Vorhersagebeginn:"],
+            width=5
         ),
-        dcc.DatePickerSingle(
-            id=date_picker_name,
-            style={'width': '100%'},
-            display_format='DD. MMM YYYY',
-            first_day_of_week=1,
-            min_date_allowed=min_date,
-            max_date_allowed=max_date,
-            initial_visible_month=init_date,
-            date=init_date+timedelta(days=deltadays),
+        dbc.Col(
+            dcc.DatePickerSingle(
+                id=date_picker_name,
+                style={'width': '100%'},
+                display_format='DD. MMM YYYY',
+                first_day_of_week=1,
+                min_date_allowed=min_date,
+                max_date_allowed=max_date,
+                initial_visible_month=init_date,
+                date=init_date+timedelta(days=deltadays),
+            ),
+            width=7,
+            align="center"
         ),
         html.Div(
             id=f"{date_picker_name}_output_container",
@@ -65,38 +106,38 @@ def create_date_picker(date_picker_name):
             children=[
                 (init_date + timedelta(days=deltadays)).strftime('%Y_%m_%d')],
         ),
-        dbc.Label(
-            id=f"{date_picker_name}_label2",
-            children=["(auf Basis der Daten des vorherigen 3-Wochenfensters)"],
-        ),
-    ])
+        dbc.FormText(
+            children=[
+                html.Center("(auf Basis der Daten des vorherigen 3-Wochenfensters)")
+            ],
+            color="secondary",
+            style={'width': '100%'}
+        )],
+        row=True
+    )
 
 
 def create_position_controls(position_control_name):
     return dbc.FormGroup([
-    dbc.Label(
-        id='{}_label'.format(position_control_name),
-        children=["Wähle Landkreis:"],
-    ),
-    dcc.Dropdown(
-        id='{}_variable'.format(position_control_name),
-        value=init_countyid,
-        options=[
-            {"label": row['LKName'] + " (" + row['LKType'] + ")", "value": row['countyID']} 
-            for index, row in metadata.iterrows()
-        ]
-    ),
-    html.A(
-        children=[
-            html.I(className='fa fa-download mr-2'),
-            'CSV Datei'],
-        id=f"{position_control_name}_download",
-        download="",
-        href="",
-        target="_blank",
-        className="btn btn-primary mt-2"
-    ),
-])
+        dbc.Label(
+            id='{}_label'.format(position_control_name),
+            children=["Landkreis:"],
+            width=5
+        ),
+        dbc.Col(        
+            dcc.Dropdown(
+                id='{}_variable'.format(position_control_name),
+                value=init_countyid,
+                options=[
+                    {"label": row['LKName'] + " (" + row['LKType'] + ")", "value": row['countyID']} 
+                    for index, row in metadata.iterrows()
+                ]
+            ),
+            width=7
+        )],
+        row=True,
+        style={'margin-top': '0.5rem', 'margin-bottom': '0.5rem'}
+    )
 
 
 toggle_left = create_depiction_toggle('toggle_left')

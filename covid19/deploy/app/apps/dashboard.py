@@ -13,6 +13,7 @@ from layouts.controls import toggle_left, toggle_right
 from layouts.controls import pos_controls_left, pos_controls_right
 from layouts.plots import geglaettet_tab_left, ungeglaettet_tab_left
 from layouts.plots import geglaettet_tab_right, ungeglaettet_tab_right
+from layouts.csv_download import download_left, download_right
 
 
 tab_height = '5vh'
@@ -121,11 +122,11 @@ body_layout = dbc.Container(
                         'margin': '0% 0% 0% 0%', # top, right, bottom, left
                         'padding': '0',
                     },
-                    body=True,   
+                    body=True,
                     children=[
                         dbc.CardHeader([
-                            toggle_left,
                             date_picker_left,
+                            toggle_left
                         ]),
                         dbc.CardBody(
                             className='mt-3',
@@ -177,10 +178,11 @@ body_layout = dbc.Container(
                                                     style={'padding': '0'} # height': '450px'}
                                                 ),
                                             ]),
-                                html.P(
-                                    id='pos_card_left_content',
-                                    className="card-text",
-                                ),
+#                                 html.P(
+#                                     id='pos_card_left_content',
+#                                     className="card-text",
+#                                 ),
+                                download_left
                             ]),
                     ]),
             ]),
@@ -195,8 +197,8 @@ body_layout = dbc.Container(
                     children=[
                         # --- Zeitangabe  ---
                         dbc.CardHeader([
-                            toggle_right,
                             date_picker_right,
+                            toggle_right,
                         ]),
                         dbc.CardBody(
                             className='mt-3',
@@ -248,10 +250,11 @@ body_layout = dbc.Container(
                                                     style={'padding': '0'} # height': '450px'}
                                                 ),
                                             ]),
-                                html.P(
-                                    id='pos_card_right_content',
-                                    className="card-text",
-                                ),
+#                                 html.P(
+#                                     id='pos_card_right_content',
+#                                     className="card-text",
+#                                 ),
+                                download_right
                             ]),
                     ]),
             ]),

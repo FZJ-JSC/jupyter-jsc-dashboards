@@ -6,6 +6,16 @@ from datetime import datetime
 
 locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
 
+
+def append_to_column_dict(column_dict, string):
+    for column_name in column_dict:
+        try:
+            if column_name is not 'rki':
+                column_dict[column_name]['column'] += string
+        except:
+            pass
+
+
 column_dict_raw = {
     'rki': {
         'column': 'RKI Meldedaten',
@@ -40,8 +50,7 @@ column_dict_raw = {
 }
 
 column_dict_raw_100k = column_dict_raw.copy()
-column_dict_raw_100k['mean']['column'] += '100k'
-
+append_to_column_dict(column_dict_raw_100k, ' 100k')
 
 column_dict_trend = {
     'rki': {
@@ -77,8 +86,7 @@ column_dict_trend = {
 }
 
 column_dict_trend_100k = column_dict_trend.copy()
-column_dict_trend_100k['mean']['column'] += '100k'
-
+append_to_column_dict(column_dict_trend_100k, ' 100k')
 
 column_dict_7days = {
     'rki': {
@@ -114,7 +122,7 @@ column_dict_7days = {
 }
 
 column_dict_7days_100k = column_dict_7days.copy()
-column_dict_7days_100k['mean']['column'] += '100k'
+append_to_column_dict(column_dict_7days_100k, ' 100k')
 
 
 def create_figure_from_df(df, column_dict, rki=True):

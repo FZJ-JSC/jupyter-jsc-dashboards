@@ -39,7 +39,7 @@ def create_static_map_data(geojson_path):
         'names': [feat['properties'].get('GEN') for feat in counties_geojson['features']],
         'cca': [feat['properties'].get('RS') for feat in counties_geojson['features']],
     })
-    
+
     return (counties_geojson, counties_metadf)
 
 
@@ -55,9 +55,9 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
             if cca_str is not None:
                 cca_filtered_df = mapcsv.loc[mapcsv['countyID']==int(cca_str), column]
                 cca_value = next(iter(cca_filtered_df), 0.0)
-                infections_array.append(cca_value)             
+                infections_array.append(cca_value)
             else:
-                infections_array.append(0.0)     
+                infections_array.append(0.0)
     except IOError:
         logger.debug("File not found: " + mapcsv_path)
         for feat in counties_geojson['features']:
@@ -67,15 +67,22 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
     return counties_infectionsdf
 
 
-def create_map_figure(counties_geojson, counties_metadf,
-                      mapcsv_path, column,
-                      normed_to_100k=True,
+def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
+                      column, n_people,
+                      normed_to_100k=True, incidence_values=True,
                       width=None, height=None, zmax=100):
-    counties_infectionsdf = create_dynamic_map_data(counties_geojson, mapcsv_path, column)
 
-    colorbar_text = "Neuinfektionen pro 100.000 Einwohner und Tag"
-    if not normed_to_100k:
-        colorbar_text = "Neuinfektionen pro Einwohner und Tag"
+    counties_infectionsdf = create_dynamic_map_data(
+        counties_geojson, mapcsv_path, column)
+
+    if incidence_values:
+        colorbar_text = "7-Tage-Inzidenz"
+    else:
+        colorbar_text = "Neuinfektionen des Tages"
+    if normed_to_100k:
+        colorbar_text += " pro 100.000 Einwohner"
+    else:
+        colorbar_text += " pro Einwohner"
 
     fig = go.Figure(
         go.Choroplethmapbox(
@@ -84,13 +91,15 @@ def create_map_figure(counties_geojson, counties_metadf,
             locations=counties_metadf.geoids,
             # Set text elements associated with each location.
             text=counties_metadf.names,
+            # Set custom data to use in hovertemplate
+            customdata=n_people,
             # Set data to be color-coded.
             z=counties_infectionsdf.infections,
             # Set colorscale and bar
             colorscale='YlOrRd',
             colorbar=dict(
-                thickness=20, 
-                ticklen=3, 
+                thickness=20,
+                ticklen=3,
                 title=dict(
                     text=colorbar_text,
                     side='right'
@@ -100,9 +109,9 @@ def create_map_figure(counties_geojson, counties_metadf,
             # Set lines between features
             marker_opacity=0.75, marker_line_width=0.1,
             # Set data shown on hover
-            hovertemplate=
-                "<b>%{text}</b><br>" +
-                "%{z:.2f}<br>" +
+            hovertemplate="<b>%{text}</b><br>" +
+                "Einwohner: %{customdata:.3s}<br>" +
+                "Wert: %{z:.2f}<br>" +
                 "<extra></extra>",
         )
     ) 
@@ -118,9 +127,9 @@ def create_map_figure(counties_geojson, counties_metadf,
         # Preserve UI state when updating.
         uirevision=True, 
         # Set mapbox.
-        mapbox_style="carto-positron", # https://plotly.com/python/mapbox-layers/
+        mapbox_style="carto-positron",  # https://plotly.com/python/mapbox-layers/
         mapbox_zoom=4.5,
         mapbox_center={"lat": 51.30, "lon": 10.45},
     )
-    
+
     return fig

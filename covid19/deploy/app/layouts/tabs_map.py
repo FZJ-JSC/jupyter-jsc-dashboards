@@ -4,6 +4,7 @@ import dash_html_components as html
 
 from app import init_mapfig_bstim, init_mapfig_rki
 
+
 # Maps
 def create_map_tab(tab_name, figure):
     return dbc.Card(
@@ -23,7 +24,7 @@ def create_map_tab(tab_name, figure):
                                     # might need div around graph?
                                     dcc.Graph(
                                         id='{}_graph'.format(tab_name), 
-                                        figure=init_mapfig_bstim, 
+                                        figure=figure, 
                                         style={
                                             'width': '100%', 
                                             'height': '100%',

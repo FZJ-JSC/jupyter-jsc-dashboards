@@ -10,13 +10,14 @@ from pathlib import Path
 from datetime import datetime as dt, timedelta
 from plotly_figures.maps import *
 
+FONT_AWESOME = "https://use.fontawesome.com/releases/v5.10.2/css/all.css"
 
 ## JupyterLab
 # from jupyter_dash import JupyterDash
 # dash_app = JupyterDash(
 app = dash.Dash(  # Deploy
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    external_stylesheets=[dbc.themes.BOOTSTRAP, FONT_AWESOME],
     update_title=None,
     suppress_callback_exceptions=True, # because of multi-page setup
 )
@@ -128,14 +129,19 @@ geojson_path = "assets/DE-Landkreise_RKI.geojson.json"
 mapcsv_path = "{}map.csv".format(init_assets_path)
 counties_geojson, counties_metadf = create_static_map_data(geojson_path)
 
+# Get n_people df from a chosen date
+metadata_csv = pd.read_csv("assets/csv/2020_10_19/metadata.csv")
+n_people = metadata_csv.n_people
+
 # Initial maps.
 init_mapfig_bstim = create_map_figure(
-    counties_geojson, counties_metadf, mapcsv_path, column='newInf100k',
+    counties_geojson, counties_metadf, mapcsv_path,
+    n_people=n_people, column='newInf100k',
     width=500, height=450)  # size is important to ensure, that figure is created _now_ and not on resize-event
 init_mapfig_rki = create_map_figure(
-    counties_geojson, counties_metadf, mapcsv_path, column='newInf100k_RKI',
+    counties_geojson, counties_metadf, mapcsv_path, 
+    n_people=n_people, column='newInf100k_RKI',
     width=500, height=450)  # size is important to ensure, that figure is created _now_ and not on resize-event
-
 
 # import layout at the end of this file is important to deploy it with gunicorn
 import index
