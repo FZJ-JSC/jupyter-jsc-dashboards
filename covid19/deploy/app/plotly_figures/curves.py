@@ -1,3 +1,4 @@
+import copy
 import pandas as pd
 import plotly.graph_objects as go
 import locale
@@ -10,7 +11,7 @@ locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
 def append_to_column_dict(column_dict, string):
     for column_name in column_dict:
         try:
-            if column_name is not 'rki':
+            if column_name != 'rki':
                 column_dict[column_name]['column'] += string
         except:
             pass
@@ -49,7 +50,7 @@ column_dict_raw = {
     }
 }
 
-column_dict_raw_100k = column_dict_raw.copy()
+column_dict_raw_100k = copy.deepcopy(column_dict_raw)
 append_to_column_dict(column_dict_raw_100k, ' 100k')
 
 column_dict_trend = {
@@ -85,7 +86,7 @@ column_dict_trend = {
     }
 }
 
-column_dict_trend_100k = column_dict_trend.copy()
+column_dict_trend_100k = copy.deepcopy(column_dict_trend)
 append_to_column_dict(column_dict_trend_100k, ' 100k')
 
 column_dict_7days = {
@@ -121,7 +122,7 @@ column_dict_7days = {
     }
 }
 
-column_dict_7days_100k = column_dict_7days.copy()
+column_dict_7days_100k = copy.deepcopy(column_dict_7days)
 append_to_column_dict(column_dict_7days_100k, ' 100k')
 
 
@@ -193,9 +194,11 @@ def update_layout(fig, fixedrange=False,
                   color_legend='rgb(229, 236, 246)', 
                   color_forecast='rgb(24, 145, 255)', 
                   color_nowcast='rgb(136, 207, 250)'):
-    # Find y_max from q95 column data
-    y_range_list = [value for value in fig.data[5]['y'] if not pd.isna(value)]
-    y_max = max(y_range_list)
+    # Find y_max from column data
+    rki_list = [value for value in fig.data[7]['y'] if not pd.isna(value)]
+    q95_list = [value for value in fig.data[5]['y'] if not pd.isna(value)]
+    y_max = max(*rki_list, *q95_list) + 15 # Add space to render markers
+    
     x_data = fig.data[-1]['x']
     x_labels = []
     # Create x-axis labels
@@ -274,7 +277,7 @@ def update_layout(fig, fixedrange=False,
                        text="Forecast", bgcolor=color_forecast)
     fig.update_annotations(
         xanchor="left", yanchor="top",
-        yref="y", y=y_max, 
+        yref="y", y=y_max,
         font=dict(
             family="Courier New, monospace",
             size=16,
@@ -315,10 +318,10 @@ def minimize(fig, height=None, width=None):
     )
 
 
-def plotit(df, column_dict, rki=True, 
+def plotit(df, column_dict, rki=True,
            fixedrange=False,
-           color_legend='rgb(229, 236, 246)', 
-           color_forecast='rgb(24, 145, 255)', 
+           color_legend='rgb(229, 236, 246)',
+           color_forecast='rgb(24, 145, 255)',
            color_nowcast='rgb(136, 207, 250)'):
     fig = create_figure_from_df(df, column_dict)
     return update_layout(fig, 
