@@ -21,14 +21,12 @@ def create_depiction_toggle(toggle_name):
                                 dbc.Button(
                                     "7-Tage-Inzidenz",
                                     id=f"{toggle_name}_7_days_button1",
-                                    outline=True,
-                                    className="toggle-btn col-6"
+                                    className="col-6"
                                 ),
                                 dbc.Button(
                                     "Neuinfektionen des Tages",
                                     id=f"{toggle_name}_7_days_button2",
-                                    outline=True,
-                                    className="toggle-btn col-6"
+                                    className="col-6"
                                 )],
                             size='sm',
                             style={'width': '100%'}
@@ -45,14 +43,12 @@ def create_depiction_toggle(toggle_name):
                                     dbc.Button(
                                         "pro 100.000",
                                         id=f"{toggle_name}_100k_button1",
-                                        outline=True,
-                                        className="toggle-btn col-6"
+                                        className="col-6"
                                     ), 
                                     dbc.Button(
                                         "absolut",
                                         id=f"{toggle_name}_100k_button2",
-                                        outline=True,
-                                        className="toggle-btn col-6"
+                                        className="col-6"
                                     )],
                                 size='sm',
                                 className="mr-2 mt-2",
