@@ -74,6 +74,9 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
 
     counties_infectionsdf = create_dynamic_map_data(
         counties_geojson, mapcsv_path, column)
+    if zmax == None:
+        zmax = counties_infectionsdf.max().tolist()[0]
+        zmax = (zmax + 90) // 100 * 100
 
     if incidence_values:
         colorbar_text = "7-Tage-Inzidenz"
@@ -82,7 +85,7 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
     if normed_to_100k:
         colorbar_text += " pro 100.000 Einwohner"
     else:
-        colorbar_text += " pro Einwohner"
+        colorbar_text += " für gesamten Landkreis"
 
     fig = go.Figure(
         go.Choroplethmapbox(
@@ -114,7 +117,7 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
                 "Wert: %{z:.2f}<br>" +
                 "<extra></extra>",
         )
-    ) 
+    )
 
     # Set width and height.
     if width:
@@ -125,7 +128,7 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         # Preserve UI state when updating.
-        uirevision=True, 
+        uirevision=True,
         # Set mapbox.
         mapbox_style="carto-positron",  # https://plotly.com/python/mapbox-layers/
         mapbox_zoom=4.5,

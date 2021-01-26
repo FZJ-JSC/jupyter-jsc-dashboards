@@ -1,5 +1,6 @@
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+import dash_daq as daq
 import dash_html_components as html
 
 from app import min_date, max_date, init_date, deltadays
@@ -33,34 +34,44 @@ def create_depiction_toggle(toggle_name):
                         ),
                         width=12
                     ),
-        #         ),
-        #         dbc.Row(
-                    dbc.Col(
-        #                 dbc.Collapse(
-                            dbc.ButtonGroup(
-                                id=f"{toggle_name}_100k",
-                                children=[
-                                    dbc.Button(
-                                        "pro 100.000",
-                                        id=f"{toggle_name}_100k_button1",
-                                        className="col-6"
-                                    ), 
-                                    dbc.Button(
-                                        "absolut",
-                                        id=f"{toggle_name}_100k_button2",
-                                        className="col-6"
-                                    )],
-                                size='sm',
-                                className="mr-2 mt-2",
-                                style={'width': '100%'}
+                    dbc.Row(
+                         children=[
+                            dbc.Label(
+                                "7-Tage-Inzidenz",
+                                style={'width': '175px', 'text-align': 'right'}
                             ),
-        #                     id=f"{toggle_name}_collapse",
-        #                 ),
-        #                 width={"size": 7, "offset": 5},
-                        width=12
+                            daq.BooleanSwitch(
+                                id=f"{toggle_name}_7_days_switch",
+                                on=False,
+                                className='mx-2',
+                            ),
+                            dbc.Label(
+                                "Neuinfektionen des Tages",
+                                style={'width': '175px'}
+                            ),
+                        ],
+                        className='mt-2 mx-3',
+                        style={'width': '100%', 'display': 'none'},
+                        justify='center'
+                    ),
+                    dbc.Row(
+                        children=[
+                            dbc.Label(
+                                "pro 100.000 Einwohner",
+                                style={'width': '175px', 'text-align': 'right'}
+                            ),
+                            daq.BooleanSwitch(
+                                id=f"{toggle_name}_100k_switch",
+                                on=False,
+                                className='mx-2',
+                            ),
+                            dbc.Label("Gesamter Landkreis", style={'width': '175px'}),
+                        ],
+                        className='mt-2 mx-3',
+                        style={'width': '100%'},
+                        justify='center'
                     )
                 ],
-                style={'display': 'flex'}
             ),
             html.Div(
                 dbc.FormText(

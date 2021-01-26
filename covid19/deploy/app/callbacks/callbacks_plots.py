@@ -16,7 +16,7 @@ from plotly_figures import curves
 logger = setup_logger()
 
 
-def update_plot(value, selected_date, column_dict, smaller_threshold=False):
+def update_plot(value, selected_date, column_dict, rki=True, smaller_threshold=False, incidence_values=False):
 #     selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
     assets_datadir = get_assets_datadir(selected_date)
     placeholder_img = html.Img(
@@ -51,8 +51,8 @@ def update_plot(value, selected_date, column_dict, smaller_threshold=False):
         return placeholder_img, placeholder_img
 
 #     try:
-    fig = curves.plotit(df_curve, column_dict)
-    fig_fixedrange = curves.plotit(df_curve, column_dict, fixedrange=True,)
+    fig = curves.plotit(df_curve, column_dict, rki=rki, incidence_values=incidence_values)
+    fig_fixedrange = curves.plotit(df_curve, column_dict, rki=rki, fixedrange=True, incidence_values=incidence_values)
     curves.minimize(fig_fixedrange, width=fixed_plot_width, height=fixed_plot_height)
 #     except KeyError:
 #         return placeholder_img, placeholder_img
@@ -146,11 +146,11 @@ for side in ['left', 'right']:
         [Input(f"pos_control_{side}_variable", 'value'),
          # When the button color changes, we toggled incidence values
          Input(f"toggle_{side}_7_days_button1", 'color'),
-         Input(f"toggle_{side}_100k_button1", 'color'),
+         Input(f"toggle_{side}_100k_switch", 'on'),
          Input(f"date_picker_{side}_output_container", 'children')],
         State(f"pos_card_{side}_tabs", 'active_tab')
     )
-    def update_geglaettet(value, btn_color_7_days, btn_color_100k,
+    def update_geglaettet(value, btn_color_7_days, switch_value,
                           assets_dir, current_active_tab):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):
@@ -159,14 +159,16 @@ for side in ['left', 'right']:
             return plots + (False, current_active_tab)
 
         if btn_color_7_days == 'primary':  # 7 day incidence is selected
-            if btn_color_100k == 'primary':  # 100k is selected
-                plots = update_plot(value, selected_date, curves.column_dict_7days_100k)
+            if not switch_value:  # 100k is selected
+                plots = update_plot(value, selected_date, curves.column_dict_7days_100k, 
+                                    rki=False, incidence_values=True)
             else:
-                plots = update_plot(value, selected_date, curves.column_dict_7days)
+                plots = update_plot(value, selected_date, 
+                                    curves.column_dict_7days, incidence_values=True)
             return plots + (True, 'tab-0')  # Disable 2nd tab and switch to 1st
 
-        if btn_color_100k == 'primary':  # 100k is selected
-            plots = update_plot(value, selected_date, curves.column_dict_trend_100k)
+        if not switch_value:  # 100k is selected
+            plots = update_plot(value, selected_date, curves.column_dict_trend_100k, rki=False)
         else:
             plots = update_plot(value, selected_date, curves.column_dict_trend)
         return plots + (False, current_active_tab)  # Enable 2nd tab
@@ -176,17 +178,18 @@ for side in ['left', 'right']:
         [Output(f"ungeglaettet_{side}_img", 'children'),
          Output(f"ungeglaettet_{side}_modal_img", 'children')],
         [Input(f"pos_control_{side}_variable", 'value'),
-         Input(f"toggle_{side}_100k_button1", 'color'),
+#          Input(f"toggle_{side}_100k_button1", 'color'),
+         Input(f"toggle_{side}_100k_switch", 'on'),
          Input(f"date_picker_{side}_output_container", 'children')]
     )
-    def update_ungeglaettet(value, btn_color_100k, assets_dir):
+    def update_ungeglaettet(value, switch_value, assets_dir):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):
             plots = update_plot(value, selected_date, curves.column_dict_raw,
                                 smaller_threshold=True)
             return plots
-
-        if btn_color_100k == 'primary':  # 100k is selected
+        
+        if not switch_value:  # 100k is selected
             plots = update_plot(value, selected_date, curves.column_dict_raw_100k)
         else:
             plots = update_plot(value, selected_date, curves.column_dict_raw)

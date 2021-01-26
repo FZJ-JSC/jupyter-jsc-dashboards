@@ -190,14 +190,16 @@ def create_figure_from_df(df, column_dict, rki=True):
     return fig
 
 
-def update_layout(fig, fixedrange=False,
-                  color_legend='rgb(229, 236, 246)', 
-                  color_forecast='rgb(24, 145, 255)', 
+def update_layout(fig, fixedrange=False, rki=True, incidence_values=False,
+                  color_legend='rgb(229, 236, 246)',
+                  color_forecast='rgb(24, 145, 255)',
                   color_nowcast='rgb(136, 207, 250)'):
     # Find y_max from column data
-    rki_list = [value for value in fig.data[7]['y'] if not pd.isna(value)]
-    q95_list = [value for value in fig.data[5]['y'] if not pd.isna(value)]
-    y_max = max(*rki_list, *q95_list) + 15 # Add space to render markers
+    y_range_list = []
+    for data in fig.data:
+        if data['name'] == '95%-Quantil' or data['name'] == 'Daten RKI':
+            y_range_list += [value for value in data['y'] if not pd.isna(value)]
+    y_max = max(y_range_list) + 20 # Add space to render markers
     
     x_data = fig.data[-1]['x']
     x_labels = []
@@ -242,8 +244,11 @@ def update_layout(fig, fixedrange=False,
         ticklen=8,
         fixedrange=fixedrange # Disable panning
     )
+
+    title = "7-Tage-Inzidenz" if incidence_values else "Tages-Fallzahlen"
+    title += " des Lankreises" if rki else " pro 100.000 Einwohner"
     fig.update_yaxes(
-        title="Fallzahlen/Tag nach Meldedatum",
+        title=title,
         autorange=False,
         range=[-5, y_max],
         fixedrange=fixedrange  # Disable zooming
@@ -319,13 +324,15 @@ def minimize(fig, height=None, width=None):
 
 
 def plotit(df, column_dict, rki=True,
-           fixedrange=False,
+           fixedrange=False, incidence_values=False,
            color_legend='rgb(229, 236, 246)',
            color_forecast='rgb(24, 145, 255)',
            color_nowcast='rgb(136, 207, 250)'):
-    fig = create_figure_from_df(df, column_dict)
-    return update_layout(fig, 
+    fig = create_figure_from_df(df, column_dict, rki=rki)
+    return update_layout(fig,
                          fixedrange=fixedrange,
+                         incidence_values=incidence_values,
+                         rki=rki,
                          color_legend=color_legend,
                          color_forecast=color_forecast,
                          color_nowcast=color_nowcast)
