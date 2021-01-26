@@ -6,7 +6,6 @@ def create_csv_links(component_name):
         id=f"{component_name}_div",
         children=[
             html.A(
-#                 html.Small("Rohdaten für Berlin Mitte SK vom 01.12.2020 als CSV Datei"),
                 id=f"{component_name}_download",
                 download="",
                 href="",
@@ -19,8 +18,7 @@ def create_csv_links(component_name):
                     html.Small("Erklärung der CSV Spalten"),
                 ]),
                 id=f"{component_name}_erklaerung",
-                download="",
-                href="",
+                href="/csv",
                 target="_blank",
 #                 style={'color': 'var(--secondary)'}
             )

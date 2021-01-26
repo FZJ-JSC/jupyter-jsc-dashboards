@@ -35,7 +35,7 @@ body_layout = dbc.Container(
                 style={
                     'marginBottom': 10,
                     'width': 12,
-                },  
+                },
                 children=[
                     dcc.Markdown(
                         f"""
@@ -49,7 +49,7 @@ body_layout = dbc.Container(
                         style={'display': 'block' if warning_txt != '' else 'none'},
                     ),
                 ]
-            ), 
+            ),
         ]),
         dbc.Row([
             dbc.Col(
@@ -65,11 +65,11 @@ body_layout = dbc.Container(
                                 'margin-right': 'auto'
                             },
                         )
-                    ], 
+                    ],
                     href='https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics'),
                 ]
             ),
-            dbc.Col(width=4), 
+            dbc.Col(width=4),
             dbc.Col(
                 width=4,
                 children=[
@@ -101,7 +101,7 @@ body_layout = dbc.Container(
                 },
                 children=[explanations_right]),
         ]),
-        
+
         #####################
         # Visual divider
         #####################        

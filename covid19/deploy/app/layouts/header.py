@@ -1,4 +1,5 @@
 import dash_bootstrap_components as dbc
+import dash_html_components as html
 
 
 def create_header_nav_bar(button_text, href):
@@ -18,8 +19,12 @@ def create_header_nav_bar(button_text, href):
             ),
             dbc.NavItem(
                 dbc.NavLink(
-                    "Quellcode",
+                    html.Span([
+                        html.I(className="fa fa-external-link-alt mx-1"),
+                        "Quellcode"
+                    ]),
                     href="https://github.com/neuroinfo-os/BSTIM-Covid19",
+                    target="_blank"
                 )
             ),
         ]

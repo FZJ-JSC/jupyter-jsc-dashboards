@@ -3,7 +3,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app
-from apps import dashboard, faq
+from apps import csv, dashboard, faq
 from layouts.header import navbar, faq_navbar
 from layouts.footer import footer
 import callbacks
@@ -15,6 +15,9 @@ main_page = html.Div([
 ])
 faq_page = html.Div([
     faq_navbar, faq.faq_layout, footer
+])
+csv_page = html.Div([
+    faq_navbar, csv.csv_layout, footer
 ])
 
 app.layout = html.Div([
@@ -30,6 +33,8 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/faq':
         return faq_page
+    elif pathname == '/csv':
+        return csv_page
     else:
         return main_page
 
