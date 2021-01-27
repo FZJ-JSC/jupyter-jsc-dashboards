@@ -13,7 +13,8 @@ def create_header_nav_bar(button_text, href):
             dbc.NavItem(
                 dbc.Button(
                     button_text,
-                    color='primary',
+                    color='light',
+                    outline=True,
                     href=href  #"https://jupyter-jsc.fz-juelich.de/nbviewer/github/neuroinfo-os/BSTIM-Covid19/blob/master/notebooks/FragenAntworten.ipynb"
                 )
             ),
