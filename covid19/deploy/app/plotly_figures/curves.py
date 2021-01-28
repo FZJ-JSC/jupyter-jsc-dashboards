@@ -126,7 +126,7 @@ column_dict_7days_100k = copy.deepcopy(column_dict_7days)
 append_to_column_dict(column_dict_7days_100k, ' 100k')
 
 
-def create_figure_from_df(df, column_dict, rki=True):
+def create_figure_from_df(df, column_dict, rki):
     # Create figure
     fig = go.Figure()
     # Date column of df is the x data
@@ -190,16 +190,13 @@ def create_figure_from_df(df, column_dict, rki=True):
     return fig
 
 
-def update_layout(fig, fixedrange=False, rki=True, incidence_values=False,
+def update_layout(fig,
+                  fixedrange, shift_x_axes,
+                  seven_days, incidence_values,
                   color_legend='rgb(229, 236, 246)',
                   color_forecast='rgb(24, 145, 255)',
                   color_nowcast='rgb(136, 207, 250)'):
-    # Find y_max from column data
-    y_range_list = []
-    for data in fig.data:
-        if data['name'] == '95%-Quantil' or data['name'] == 'Daten RKI':
-            y_range_list += [value for value in data['y'] if not pd.isna(value)]
-    y_max = max(y_range_list) + 20 # Add space to render markers
+
     
     x_data = fig.data[-1]['x']
     x_labels = []
@@ -232,21 +229,39 @@ def update_layout(fig, fixedrange=False, rki=True, incidence_values=False,
     )
 
     # Configure axes
+    # Do not show first 7 dates when we have 7 day values
+    x_min = x_data[7] if shift_x_axes else x_data[0]
     fig.update_xaxes(
         tickmode='array',
         tickvals=x_data,
         ticktext=x_labels,
         autorange=False,
-        range=[x_data[0], x_data[-1]],
+        range=[x_min, x_data[-1]],
         ticks="outside",
         tickson="boundaries",
         tickangle=-45,
         ticklen=8,
         fixedrange=fixedrange # Disable panning
     )
-
-    title = "7-Tage-Inzidenz" if incidence_values else "Tages-Fallzahlen"
-    title += " des Lankreises" if rki else " pro 100.000 Einwohner"
+   
+    # Find y_max from column data
+    y_range_list = []
+    for data in fig.data:
+        if data['name'] == '95%-Quantil' or data['name'] == 'Daten RKI':
+            y_range_list += [value for value in data['y'] if not pd.isna(value)]
+    y_max = max(y_range_list) + 20 # Add space to render markers
+    
+    if incidence_values:
+        if seven_days:
+            title = "7-Tages-Inzidenz<br>pro 100.000 Einwohner"
+        else:
+            title = "Inzidenz Wert des Tages<br>pro 100.000 Einwohner"
+    elif not incidence_values:
+        if seven_days:
+            title = "7-Tage-Fallzahlen<br>des Landkreises"
+        else:
+            title = "Tages Fallzahlen<br>des Landkreises"
+    
     fig.update_yaxes(
         title=title,
         autorange=False,
@@ -324,15 +339,17 @@ def minimize(fig, height=None, width=None):
 
 
 def plotit(df, column_dict, rki=True,
-           fixedrange=False, incidence_values=False,
+           fixedrange=False, shift_x_axes=False,
+           seven_days=False, incidence_values=False,
            color_legend='rgb(229, 236, 246)',
            color_forecast='rgb(24, 145, 255)',
            color_nowcast='rgb(136, 207, 250)'):
     fig = create_figure_from_df(df, column_dict, rki=rki)
-    return update_layout(fig,
-                         fixedrange=fixedrange,
-                         incidence_values=incidence_values,
-                         rki=rki,
-                         color_legend=color_legend,
-                         color_forecast=color_forecast,
-                         color_nowcast=color_nowcast)
+    return update_layout(
+        fig,
+        fixedrange=fixedrange, shift_x_axes=shift_x_axes,
+        seven_days=seven_days, incidence_values=incidence_values,
+        color_legend=color_legend,
+        color_forecast=color_forecast,
+        color_nowcast=color_nowcast
+    )

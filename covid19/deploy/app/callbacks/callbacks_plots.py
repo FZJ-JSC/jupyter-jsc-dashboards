@@ -3,6 +3,7 @@ import dash_html_components as html
 import os
 import pandas as pd
 
+from dash import no_update
 from dash.dependencies import Input, Output, State
 from datetime import datetime as dt
 
@@ -16,8 +17,10 @@ from plotly_figures import curves
 logger = setup_logger()
 
 
-def update_plot(value, selected_date, column_dict, rki=True, smaller_threshold=False, incidence_values=False):
-#     selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
+def update_plot(value, selected_date, column_dict,
+                rki=True, shift_x_axes=False, 
+                seven_days=False, incidence_values=False,
+                smaller_threshold=False):
     assets_datadir = get_assets_datadir(selected_date)
     placeholder_img = html.Img(
         src=asset_url + "placeholders/plot_not_found.png",
@@ -44,18 +47,23 @@ def update_plot(value, selected_date, column_dict, rki=True, smaller_threshold=F
     try:
         logger.debug("Update plot: Looking for assets/{0}{1:05d}.csv".format(
             assets_datadir, value))
-        df_curve = pd.read_csv('assets/{0}{1:05d}.csv'.format(assets_datadir, value))       
+        df_curve = pd.read_csv('assets/{0}{1:05d}.csv'.format(assets_datadir, value))
     except FileNotFoundError:
         logger.debug("Could not find assets/{0}{1:05d}.csv. Falling back to {2}".format(
             assets_datadir, value, asset_url + "placeholders/plot_not_found.png"))
         return placeholder_img, placeholder_img
 
-#     try:
-    fig = curves.plotit(df_curve, column_dict, rki=rki, incidence_values=incidence_values)
-    fig_fixedrange = curves.plotit(df_curve, column_dict, rki=rki, fixedrange=True, incidence_values=incidence_values)
-    curves.minimize(fig_fixedrange, width=fixed_plot_width, height=fixed_plot_height)
-#     except KeyError:
-#         return placeholder_img, placeholder_img
+    fig = curves.plotit(
+        df_curve, column_dict,  
+        seven_days=seven_days, incidence_values=incidence_values,
+        rki=rki, shift_x_axes=shift_x_axes)
+    fig_fixedrange = curves.plotit(
+        df_curve, column_dict,
+        seven_days=seven_days, incidence_values=incidence_values,
+        rki=rki, fixedrange=True, shift_x_axes=shift_x_axes)
+    curves.minimize(
+        fig_fixedrange, width=fixed_plot_width, height=fixed_plot_height)
+
 
     graph_small = dcc.Graph(
         figure=fig_fixedrange,
@@ -71,8 +79,8 @@ def update_plot(value, selected_date, column_dict, rki=True, smaller_threshold=F
         figure=fig,
         style={'width': '100%', 'height': '100%'},
         config={
-            'displayModeBar': True, 
-            'staticPlot': False, 
+            'displayModeBar': True,
+            'staticPlot': False,
             'responsive': True,
             'modeBarButtonsToRemove': ['autoScale2d', 'toggleSpikelines']
         }
@@ -141,59 +149,71 @@ for side in ['left', 'right']:
     @app.callback(
         [Output(f"geglaettet_{side}_img", 'children'),
          Output(f"geglaettet_{side}_modal_img", 'children'),
-         Output(f"ungeglaettet_tab_{side}", 'disabled'),
+         Output(f"ungeglaettet_tab_{side}", 'tab_style'),
          Output(f"pos_card_{side}_tabs", 'active_tab')],
         [Input(f"pos_control_{side}_variable", 'value'),
          # When the button color changes, we toggled incidence values
-         Input(f"toggle_{side}_7_days_button1", 'color'),
-         Input(f"toggle_{side}_100k_switch", 'on'),
+         Input(f"toggle_{side}_incidence", 'color'),
+         Input(f"toggle_{side}_7_days_switch", 'on'),
          Input(f"date_picker_{side}_output_container", 'children')],
         State(f"pos_card_{side}_tabs", 'active_tab')
     )
-    def update_geglaettet(value, btn_color_7_days, switch_value,
+    def update_geglaettet(value, btn_color_incidence, switch_value,
                           assets_dir, current_active_tab):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):
-            plots = update_plot(value, selected_date, curves.column_dict_trend, 
+            plots = update_plot(value, selected_date, curves.column_dict_trend,
                                 smaller_threshold=True)
-            return plots + (False, current_active_tab)
+            return plots + ({'display': 'list-item'}, current_active_tab)
 
-        if btn_color_7_days == 'primary':  # 7 day incidence is selected
-            if not switch_value:  # 100k is selected
-                plots = update_plot(value, selected_date, curves.column_dict_7days_100k, 
-                                    rki=False, incidence_values=True)
-            else:
-                plots = update_plot(value, selected_date, 
-                                    curves.column_dict_7days, incidence_values=True)
-            return plots + (True, 'tab-0')  # Disable 2nd tab and switch to 1st
-
-        if not switch_value:  # 100k is selected
-            plots = update_plot(value, selected_date, curves.column_dict_trend_100k, rki=False)
-        else:
-            plots = update_plot(value, selected_date, curves.column_dict_trend)
-        return plots + (False, current_active_tab)  # Enable 2nd tab
+        if not switch_value: # 7 day values selected
+            if btn_color_incidence == 'primary':  # incidence values selected
+                plots = update_plot(
+                    value, selected_date, curves.column_dict_7days_100k,
+                    rki=False, shift_x_axes=True, 
+                    incidence_values=True, seven_days=True)
+            else:  # Number of cases selected
+                plots = update_plot(
+                    value, selected_date, curves.column_dict_7days, 
+                    seven_days=True, shift_x_axes=True)
+            return plots + ({'display': 'none'}, 'tab-0')  # Hide 2nd tab and switch to 1st
+        
+        else:  # per day values selected
+            if btn_color_incidence == 'primary':  # incidence values selected
+                plots = update_plot(
+                    value, selected_date, curves.column_dict_trend_100k, 
+                    incidence_values=True, rki=False)
+            else:  # Number of cases selected
+                plots = update_plot(
+                    value, selected_date, curves.column_dict_trend)
+            return plots + ({'display': 'list-item'}, current_active_tab)  # Show 2nd tab
 
     # Plots ungeglaettet
     @app.callback(
         [Output(f"ungeglaettet_{side}_img", 'children'),
          Output(f"ungeglaettet_{side}_modal_img", 'children')],
         [Input(f"pos_control_{side}_variable", 'value'),
-#          Input(f"toggle_{side}_100k_button1", 'color'),
-         Input(f"toggle_{side}_100k_switch", 'on'),
+         Input(f"toggle_{side}_incidence", 'color'),
+         Input(f"toggle_{side}_7_days_switch", 'on'),
          Input(f"date_picker_{side}_output_container", 'children')]
     )
-    def update_ungeglaettet(value, switch_value, assets_dir):
+    def update_ungeglaettet(value, btn_color_incidence, switch_value, assets_dir):
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):
-            plots = update_plot(value, selected_date, curves.column_dict_raw,
-                                smaller_threshold=True)
+            plots = update_plot(
+                value, selected_date, curves.column_dict_raw, smaller_threshold=True)
             return plots
-        
-        if not switch_value:  # 100k is selected
-            plots = update_plot(value, selected_date, curves.column_dict_raw_100k)
+            
+        if switch_value:  # per day values selected
+            if btn_color_incidence == 'primary':  # incidence values selected
+                plots = update_plot(
+                    value, selected_date, curves.column_dict_raw_100k,
+                    incidence_values=True, rki=False)
+            else:  # Number of cases selected
+                plots = update_plot(value, selected_date, curves.column_dict_raw)
+            return plots
         else:
-            plots = update_plot(value, selected_date, curves.column_dict_raw)
-        return plots
+            return no_update
 
     # Update meta-information
     app.callback(

@@ -38,19 +38,6 @@ def show_toggle(date):
     return flex, none
 
 
-# # Show/hide per100k/absolute toggle
-# def toggle_collapse(btn1, btn2):
-#     if btn1 is None or btn2 is None:
-#         if btn2 is not None:
-#             return True
-#         else:
-#             return False
-
-#     if int(btn1) > int(btn2):
-#         return False
-#     return True
-
-
 for side in ['left', 'right']:
     # Date output container
     app.callback(
@@ -60,27 +47,15 @@ for side in ['left', 'right']:
 
     # Show/hide toggle buttons
     app.callback(
-        [Output(f"toggle_{side}_toggle_buttons", 'style'),
-         Output(f"toggle_{side}_no_toggle_text", 'style')],
-        Input(f"date_picker_{side}_output_container", 'children')   
+        [Output(f"toggle_{side}_toggles", 'style'),
+         Output(f"toggle_{side}_no_toggles_text", 'style')],
+        Input(f"date_picker_{side}_output_container", 'children')
     )(show_toggle)
 
     # Button colors
     app.callback(
-        [Output(f"toggle_{side}_7_days_button1", 'color'),
-         Output(f"toggle_{side}_7_days_button2", 'color')],
-        [Input(f"toggle_{side}_7_days_button1", 'n_clicks_timestamp'),
-         Input(f"toggle_{side}_7_days_button2", 'n_clicks_timestamp')]
+        [Output(f"toggle_{side}_incidence", 'color'),
+         Output(f"toggle_{side}_number_cases", 'color')],
+        [Input(f"toggle_{side}_incidence", 'n_clicks_timestamp'),
+         Input(f"toggle_{side}_number_cases", 'n_clicks_timestamp')]
     )(update_toggle)
-    app.callback(
-        [Output(f"toggle_{side}_100k_button1", 'color'),
-         Output(f"toggle_{side}_100k_button2", 'color')],
-        [Input(f"toggle_{side}_100k_button1", 'n_clicks_timestamp'),
-         Input(f"toggle_{side}_100k_button2", 'n_clicks_timestamp')]
-    )(update_toggle)
-#     # Show/hide per100k/absolute toggle
-#     app.callback(
-#         Output(f"toggle_{side}_collapse", "is_open"),
-#         [Input(f"toggle_{side}_7_days_button1", 'n_clicks_timestamp'),
-#          Input(f"toggle_{side}_7_days_button2", 'n_clicks_timestamp')],
-#     )(toggle_collapse)

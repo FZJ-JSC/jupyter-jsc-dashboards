@@ -145,6 +145,7 @@ body_layout = dbc.Container(
                                             ),
                                             dbc.Tab(
                                                 ikernel_tab_left,
+                                                id="ikernel_tab_left",
                                                 label="Interaktionskernel",
                                             )
                                         ]),
@@ -217,6 +218,7 @@ body_layout = dbc.Container(
                                             ),
                                             dbc.Tab(
                                                 ikernel_tab_right,
+                                                id="ikernel_tab_right",
                                                 label="Interaktionskernel",
                                             ),
                                         ]),

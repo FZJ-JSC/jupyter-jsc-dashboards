@@ -68,24 +68,28 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
 
 
 def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
-                      column, n_people,
-                      normed_to_100k=True, incidence_values=True,
-                      width=None, height=None, zmax=100):
+                      column, n_people, zmax=None,
+                      seven_days=False, incidence_values=False,
+                      width=None, height=None, ):
 
     counties_infectionsdf = create_dynamic_map_data(
         counties_geojson, mapcsv_path, column)
-    if zmax == None:
+    if zmax is None:
         zmax = counties_infectionsdf.max().tolist()[0]
         zmax = (zmax + 90) // 100 * 100
 
     if incidence_values:
-        colorbar_text = "7-Tage-Inzidenz"
-    else:
-        colorbar_text = "Neuinfektionen des Tages"
-    if normed_to_100k:
-        colorbar_text += " pro 100.000 Einwohner"
-    else:
-        colorbar_text += " für gesamten Landkreis"
+        colorscale = 'YlOrRd'
+        if seven_days:
+            colorbar_text = "7-Tage-Inzidenz pro 100.000 Einwohner"
+        else:
+            colorbar_text = "Inzidenz Wert des Tages pro 100.000 Einwohner"
+    elif not incidence_values:
+        colorscale = 'deep'
+        if seven_days:
+            colorbar_text = "Fallzahlen der letzten 7 Tage pro Landkreis"
+        else:
+            colorbar_text = "Tages Fallzahlen pro Landkreises"
 
     fig = go.Figure(
         go.Choroplethmapbox(
@@ -99,7 +103,7 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
             # Set data to be color-coded.
             z=counties_infectionsdf.infections,
             # Set colorscale and bar
-            colorscale='YlOrRd',
+            colorscale=colorscale,
             colorbar=dict(
                 thickness=20,
                 ticklen=3,
