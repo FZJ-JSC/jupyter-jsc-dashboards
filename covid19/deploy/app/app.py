@@ -131,7 +131,18 @@ counties_geojson, counties_metadf = create_static_map_data(geojson_path)
 
 # Get n_people df from a chosen date
 metadata_csv = pd.read_csv("assets/csv/2020_10_19/metadata.csv")
-n_people = metadata_csv.n_people
+n_people_array = []
+# Get no. people for each county from mapcsv 
+for feat in counties_geojson['features']:
+    # Need the county id to find the corresponding value in metadata_csv
+    cca_str = feat['properties'].get('RS')
+    if cca_str is not None:
+        cca_filtered_df = metadata_csv.loc[metadata_csv['countyID']==int(cca_str), 'n_people']
+        cca_value = next(iter(cca_filtered_df), 0.0)
+        n_people_array.append(cca_value)
+    else:
+        n_people_array.append(0.0)
+n_people_df = pd.DataFrame(data={'n_people': n_people_array})
 
 # Initial maps.
 init_mapfig_bstim = create_map_figure(
