@@ -11,12 +11,13 @@ def update_download_link(value, assets_dir):
     selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
     if (threshold_date is not None) and (selected_date <= threshold_date):
         return "", "", "", {'display': 'none'}
-
+    
     assets_datadir = get_assets_datadir(selected_date)
     county_id = '{:05d}'.format(value)
     county_series = counties_metadf.loc[counties_metadf['cca'] == county_id].names
     county = county_series.tolist()[0]
-    file_name = '{}_{}.csv'.format(county_id, county).replace(' ', '_')
+    file_name = '{}_{}_{}.csv'.format(
+        county_id, county, selected_date.strftime('%Y-%m-%d')).replace(' ', '_')
     csv_path = f"assets/{assets_datadir}{county_id}.csv"
 
     text = "Rohdaten für {} vom {} als CSV Datei".format(
