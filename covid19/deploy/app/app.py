@@ -148,10 +148,12 @@ n_people_df = pd.DataFrame(data={'n_people': n_people_array})
 init_mapfig_bstim = create_map_figure(
     counties_geojson, counties_metadf, mapcsv_path,
     n_people=n_people_df, column='newInf100k',
+    seven_days=True, incidence_values=True,
     width=500, height=450)  # size is important to ensure, that figure is created _now_ and not on resize-event
 init_mapfig_rki = create_map_figure(
     counties_geojson, counties_metadf, mapcsv_path, 
     n_people=n_people_df, column='newInf100k_RKI',
+    seven_days=True, incidence_values=True,
     width=500, height=450)  # size is important to ensure, that figure is created _now_ and not on resize-event
 
 # import layout at the end of this file is important to deploy it with gunicorn

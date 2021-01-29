@@ -70,7 +70,7 @@ def create_dynamic_map_data(counties_geojson, mapcsv_path, column):
 def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
                       column, n_people, zmax=None,
                       seven_days=False, incidence_values=False,
-                      width=None, height=None, ):
+                      width=500, height=450):
 
     counties_infectionsdf = create_dynamic_map_data(
         counties_geojson, mapcsv_path, column)
@@ -124,10 +124,8 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
     )
 
     # Set width and height.
-    if width:
-        fig.update_layout(width=width)
-    if height:
-        fig.update_layout(height=height)
+    fig.update_layout(width=width)
+    fig.update_layout(height=height)
     # Set other layout options.
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
