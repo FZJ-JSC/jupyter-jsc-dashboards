@@ -83,13 +83,13 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
         if seven_days:
             colorbar_text = "7-Tage-Inzidenz pro 100.000 Einwohner"
         else:
-            colorbar_text = "Inzidenz Wert des Tages pro 100.000 Einwohner"
+            colorbar_text = "1-Tages-Inzidenz pro 100.000 Einwohner"
     elif not incidence_values:
         colorscale = 'deep'
         if seven_days:
             colorbar_text = "Fallzahlen der letzten 7 Tage pro Landkreis"
         else:
-            colorbar_text = "Tages Fallzahlen pro Landkreises"
+            colorbar_text = "Fallzahlen des Tages pro Landkreises"
 
     fig = go.Figure(
         go.Choroplethmapbox(

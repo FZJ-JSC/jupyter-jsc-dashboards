@@ -253,14 +253,14 @@ def update_layout(fig,
     
     if incidence_values:
         if seven_days:
-            title = "7-Tages-Inzidenz<br>pro 100.000 Einwohner"
+            title = "7-Tage-Inzidenz<br>pro 100.000 Einwohner"
         else:
-            title = "Inzidenz Wert des Tages<br>pro 100.000 Einwohner"
+            title = "1-Tages-Inzidenz<br>pro 100.000 Einwohner"
     elif not incidence_values:
         if seven_days:
-            title = "7-Tage-Fallzahlen<br>des Landkreises"
+            title = "Fallzahlen der letzen 7 Tage<br>des Landkreises"
         else:
-            title = "Tages Fallzahlen<br>des Landkreises"
+            title = "Fallzahlen des Tages<br>des Landkreises"
     
     fig.update_yaxes(
         title=title,

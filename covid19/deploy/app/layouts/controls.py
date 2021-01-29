@@ -13,20 +13,19 @@ def create_depiction_toggle(toggle_name):
         id=f"{toggle_name}",
         children = [
             dbc.Row(
-                id=f"{toggle_name}_toggle_buttons",
+                id=f"{toggle_name}_toggles",
                 children=[
                     dbc.Col(
                         dbc.ButtonGroup(
-                            id=f"{toggle_name}_7_days",
                             children=[
                                 dbc.Button(
-                                    "7-Tage-Inzidenz",
-                                    id=f"{toggle_name}_7_days_button1",
+                                    "Inzidenz Werte",
+                                    id=f"{toggle_name}_incidence",
                                     className="col-6"
                                 ),
                                 dbc.Button(
-                                    "Neuinfektionen des Tages",
-                                    id=f"{toggle_name}_7_days_button2",
+                                    "Fallzahlen",
+                                    id=f"{toggle_name}_number_cases",
                                     className="col-6"
                                 )],
                             size='sm',
@@ -34,10 +33,18 @@ def create_depiction_toggle(toggle_name):
                         ),
                         width=12
                     ),
+                    dbc.Col(
+                        dbc.FormText(
+                            html.Center("pro 100.000 Einwohner"),
+                            color="secondary",
+                        ),
+                        className='pr-0',
+                        width=6
+                    ),
                     dbc.Row(
-                         children=[
+                        children=[
                             dbc.Label(
-                                "7-Tage-Inzidenz",
+                                "7 Tage",
                                 style={'width': '175px', 'text-align': 'right'}
                             ),
                             daq.BooleanSwitch(
@@ -45,27 +52,7 @@ def create_depiction_toggle(toggle_name):
                                 on=False,
                                 className='mx-2',
                             ),
-                            dbc.Label(
-                                "Neuinfektionen des Tages",
-                                style={'width': '175px'}
-                            ),
-                        ],
-                        className='mt-2 mx-3',
-                        style={'width': '100%', 'display': 'none'},
-                        justify='center'
-                    ),
-                    dbc.Row(
-                        children=[
-                            dbc.Label(
-                                "pro 100.000 Einwohner",
-                                style={'width': '175px', 'text-align': 'right'}
-                            ),
-                            daq.BooleanSwitch(
-                                id=f"{toggle_name}_100k_switch",
-                                on=False,
-                                className='mx-2',
-                            ),
-                            dbc.Label("Gesamter Landkreis", style={'width': '175px'}),
+                            dbc.Label("Tageswert", style={'width': '175px'}),
                         ],
                         className='mt-2 mx-3',
                         style={'width': '100%'},
@@ -75,7 +62,7 @@ def create_depiction_toggle(toggle_name):
             ),
             html.Div(
                 dbc.FormText(
-                    id=f"{toggle_name}_no_toggle_text",
+                    id=f"{toggle_name}_no_toggles_text",
                     children=[
                         html.Center("Neuinfektionen des Tages pro 100.000 Einwohner")
                     ],
