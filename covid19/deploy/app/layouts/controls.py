@@ -19,7 +19,7 @@ def create_depiction_toggle(toggle_name):
                         dbc.ButtonGroup(
                             children=[
                                 dbc.Button(
-                                    "Inzidenz Werte",
+                                    "Inzidenzwerte",
                                     id=f"{toggle_name}_incidence",
                                     className="col-6"
                                 ),
