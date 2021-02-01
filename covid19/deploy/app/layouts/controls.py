@@ -45,14 +45,14 @@ def create_depiction_toggle(toggle_name):
                         children=[
                             dbc.Label(
                                 "7 Tage",
-                                style={'width': '175px', 'text-align': 'right'}
+                                style={'text-align': 'right', 'width': '70.2px'}
                             ),
                             daq.BooleanSwitch(
                                 id=f"{toggle_name}_7_days_switch",
                                 on=False,
                                 className='mx-2',
                             ),
-                            dbc.Label("Tageswert", style={'width': '175px'}),
+                            dbc.Label("Tageswert"),
                         ],
                         className='mt-2 mx-3',
                         style={'width': '100%'},

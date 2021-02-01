@@ -53,7 +53,8 @@ body_layout = dbc.Container(
         ]),
         dbc.Row([
             dbc.Col(
-                width=4,
+                sm=12,
+                md=4,
                 children=[
                     html.A([
                         html.Img(
@@ -69,9 +70,10 @@ body_layout = dbc.Container(
                     href='https://www.ikw.uni-osnabrueck.de/en/research_groups/neuroinformatics'),
                 ]
             ),
-            dbc.Col(width=4),
+            dbc.Col(width=4, className='my-1'),
             dbc.Col(
-                width=4,
+                sm=12,
+                md=4,
                 children=[
                     html.A([ 
                         html.Img(
@@ -89,12 +91,18 @@ body_layout = dbc.Container(
             ]),
         dbc.Row([
             dbc.Col(
+                xs=12,
+                sm=12,
+                md=6,
                 style={
                     'marginTop': 30,
                     'width': 6,
                 },
                 children=[explanations_bstim]),
             dbc.Col(
+                xs=12,
+                sm=12,
+                md=6,
                 style={
                     'marginTop': 30,
                     'width': 6,
@@ -116,7 +124,10 @@ body_layout = dbc.Container(
 
         dbc.Row([
             # Left column
-            dbc.Col([
+            dbc.Col(
+                sm=12,
+                md=6,              
+                children=[
                 dbc.Card(
                     style={
                         'margin': '0% 0% 0% 0%', # top, right, bottom, left
@@ -186,9 +197,13 @@ body_layout = dbc.Container(
                                 download_left
                             ]),
                     ]),
-            ]),
+            ],            
+            ),
             # Right column
-            dbc.Col([
+            dbc.Col(
+                sm=12,
+                md=6,
+                children=[
                 dbc.Card(
                     style={
                         'margin': '0% 0% 0% 0%', # top, right, bottom, left
