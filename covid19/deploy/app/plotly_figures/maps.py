@@ -125,8 +125,8 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
 
     # Set layout options.
     fig.update_layout(
-        width=width, 
-        height=height,
+#         width=width, 
+#         height=height,
 #         autosize=True,
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         # Preserve UI state when updating.

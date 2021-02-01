@@ -312,10 +312,10 @@ def update_layout(fig,
 
 
 def minimize(fig, height=None, width=None):
-    if height:
-        fig.update_layout(height=height)
-    if width:
-        fig.update_layout(width=width)
+#     if height:
+#         fig.update_layout(height=height)
+#     if width:
+#         fig.update_layout(width=width)
     font_size = 8
     fig.update_layout(
         legend=dict(

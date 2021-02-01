@@ -21,6 +21,7 @@ def create_plot_modal_and_tooltip(component_name, title, tooltip):
         dbc.Modal(
             id=f"{component_name}_modal",
             size='xl',
+            style={'max-width': '800px'},
             children=[
                 dbc.ModalHeader(title),
                 dbc.ModalBody(
