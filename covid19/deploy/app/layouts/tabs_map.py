@@ -16,14 +16,20 @@ def create_map_tab(tab_name, figure):
                 style={'padding': 0},
                 children=[
                     html.Div(
-                        id='{}_img_div'.format(tab_name),
+                        id=f"{tab_name}_img_div",
                         children=[
                             dcc.Loading(
-                                id='{}_loading_graph'.format(tab_name), 
+                                id=f"{tab_name}_loading_graph", 
                                 children=[
-                                    # might need div around graph?
+                                    # Use a dummy div to time rendering of graph after
+                                    # the children of dummy div have been determined.
+                                    # This will render the graph in the correct size.
+                                    html.Div(
+                                        id=f"{tab_name}_dummy_div",
+                                        style={'display': 'none'}
+                                    ),
                                     dcc.Graph(
-                                        id='{}_graph'.format(tab_name), 
+                                        id=f"{tab_name}_graph", 
                                         figure=figure, 
                                         style={
                                             'width': '100%', 
