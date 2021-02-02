@@ -100,28 +100,36 @@ for side in ['left', 'right']:
                     "height": 450
                 }
             }
-        
+
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
-        if (threshold_date is not None) and (selected_date <= threshold_date):
+        if (threshold_date is not None) and (selected_date <= threshold_date):            
             bstim_map = update_map_figure(
                 assets_dir, column='newInf100k', incidence_values=False, zmax=100)
             return bstim_map
 
         if btn_color_incidence == 'primary':  # incidence values selected
             if not switch_value:  # 7 day values selected
+                print('7 day incidence')
+
                 bstim_map = update_map_figure(
                     assets_dir, column='7DayInf100k', 
                     seven_days=True, incidence_values=True, zmax=250)
             else:  # per day values selected
+                print('1 day incidence')
+
                 bstim_map = update_map_figure(
                     assets_dir, column='newInf100k', 
                     incidence_values=True, zmax=100)
 
         else:  # Number of cases selected
             if not switch_value:   # 7 day values selected
+                print('7 day cases')
+                
                 bstim_map = update_map_figure(
                     assets_dir, column='7DayInfRaw', seven_days=True)
             else:  # per day values selected
+                print('1 day cases')
+                
                 bstim_map = update_map_figure(assets_dir, column='newInfRaw')
         return bstim_map
         

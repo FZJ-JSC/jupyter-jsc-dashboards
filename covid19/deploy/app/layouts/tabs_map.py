@@ -2,11 +2,9 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-from app import init_mapfig_bstim, init_mapfig_rki
-
 
 # Maps
-def create_map_tab(tab_name, figure):
+def create_map_tab(tab_name):
     return dbc.Card(
         outline=True,
         color='light',
@@ -30,7 +28,7 @@ def create_map_tab(tab_name, figure):
                                     ),
                                     dcc.Graph(
                                         id=f"{tab_name}_graph", 
-                                        figure=figure, 
+#                                         figure=figure, 
                                         style={
                                             'width': '100%', 
                                             'height': '100%',
@@ -47,8 +45,8 @@ def create_map_tab(tab_name, figure):
         ])
 
 
-rki_map_tab_left = create_map_tab('rki_map_tab_left', init_mapfig_rki)
-bstim_map_tab_left = create_map_tab('bstim_map_tab_left', init_mapfig_bstim)
+rki_map_tab_left = create_map_tab('rki_map_tab_left')
+bstim_map_tab_left = create_map_tab('bstim_map_tab_left')
 
-rki_map_tab_right = create_map_tab('rki_map_tab_right', init_mapfig_rki)
-bstim_map_tab_right = create_map_tab('bstim_map_tab_right', init_mapfig_bstim)
+rki_map_tab_right = create_map_tab('rki_map_tab_right')
+bstim_map_tab_right = create_map_tab('bstim_map_tab_right')
