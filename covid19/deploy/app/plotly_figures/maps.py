@@ -80,12 +80,14 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
 
     if incidence_values:
         colorscale = 'YlOrRd'
+        value_str = "Wert: %{z:.2f}<br>"
         if seven_days:
             colorbar_text = "7-Tage-Inzidenz pro 100.000 Einwohner"
         else:
             colorbar_text = "1-Tages-Inzidenz pro 100.000 Einwohner"
     elif not incidence_values:
         colorscale = 'deep'
+        value_str = "Wert: %{z}<br>"
         if seven_days:
             colorbar_text = "Fallzahlen der letzten 7 Tage pro Landkreis"
         else:
@@ -101,7 +103,9 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
             # Set custom data to use in hovertemplate
             customdata=n_people,
             # Set data to be color-coded.
-            z=counties_infectionsdf.infections,
+            # Round to int if we display number of new cases.
+            z=counties_infectionsdf.infections if incidence_values \
+            else counties_infectionsdf.infections.round().astype(int),
             # Set colorscale and bar
             colorscale=colorscale,
             colorbar=dict(
@@ -118,7 +122,7 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
             # Set data shown on hover
             hovertemplate="<b>%{text}</b><br>" +
                 "Einwohner: %{customdata:.3s}<br>" +
-                "Wert: %{z:.2f}<br>" +
+                value_str +
                 "<extra></extra>",
         )
     )

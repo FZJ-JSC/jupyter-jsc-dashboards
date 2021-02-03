@@ -9,7 +9,7 @@ landkreis_csv = dbc.Card([
     dbc.CardBody([
         html.Blockquote(
             html.P([
-                html.Em("Beispieldateiname: "), "12345_Landkreis.csv"
+                html.Em("Beispieldateiname: "), "12345_Landkreis_2021-01-31.csv"
             ])
         ),
         dcc.Markdown("Jede Zeile stellt einen Tag dar. \

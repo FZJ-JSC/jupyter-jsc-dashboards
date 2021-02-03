@@ -109,27 +109,19 @@ for side in ['left', 'right']:
 
         if btn_color_incidence == 'primary':  # incidence values selected
             if not switch_value:  # 7 day values selected
-                print('7 day incidence')
-
                 bstim_map = update_map_figure(
                     assets_dir, column='7DayInf100k', 
                     seven_days=True, incidence_values=True, zmax=250)
             else:  # per day values selected
-                print('1 day incidence')
-
                 bstim_map = update_map_figure(
                     assets_dir, column='newInf100k', 
                     incidence_values=True, zmax=100)
 
         else:  # Number of cases selected
             if not switch_value:   # 7 day values selected
-                print('7 day cases')
-                
                 bstim_map = update_map_figure(
                     assets_dir, column='7DayInfRaw', seven_days=True)
-            else:  # per day values selected
-                print('1 day cases')
-                
+            else:  # per day values selected               
                 bstim_map = update_map_figure(assets_dir, column='newInfRaw')
         return bstim_map
         
