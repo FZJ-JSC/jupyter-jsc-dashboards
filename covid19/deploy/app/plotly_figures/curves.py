@@ -95,23 +95,23 @@ column_dict_7days = {
         'color': 'black',
     },
     'mean': {
-        'column': 'Trend 7Week Prediction Mean',
+        'column': 'Trend 7Day Prediction Mean',
         'color': 'rgb(0,100,80)',
     },
     'q5': {
-        'column': 'Trend 7Week Prediction Q5',
+        'column': 'Trend 7Day Prediction Q5',
         'color': 'rgb(214,221,198)',
     },
     'q25': {
-        'column': 'Trend 7Week Prediction Q25',
+        'column': 'Trend 7Day Prediction Q25',
         'color': 'rgb(190,208,150)',
     },
     'q75': {
-        'column': 'Trend 7Week Prediction Q75',
+        'column': 'Trend 7Day Prediction Q75',
         'color': 'rgb(190,208,150)',
     },
     'q95': {
-        'column': 'Trend 7Week Prediction Q95',
+        'column': 'Trend 7Day Prediction Q95',
         'color': 'rgb(214,221,198)',
     },
     'q5q95': {
@@ -243,14 +243,14 @@ def update_layout(fig,
         ticklen=8,
         fixedrange=fixedrange # Disable panning
     )
-   
+
     # Find y_max from column data
     y_range_list = []
     for data in fig.data:
         if data['name'] == '95%-Quantil' or data['name'] == 'Daten RKI':
             y_range_list += [value for value in data['y'] if not pd.isna(value)]
     y_max = max(y_range_list) + 20 # Add space to render markers
-    
+
     if incidence_values:
         if seven_days:
             title = "7-Tage-Inzidenz<br>pro 100.000 Einwohner"
@@ -261,7 +261,7 @@ def update_layout(fig,
             title = "Fallzahlen der letzen 7 Tage<br>des Landkreises"
         else:
             title = "Fallzahlen des Tages<br>des Landkreises"
-    
+
     fig.update_yaxes(
         title=title,
         autorange=False,
@@ -271,7 +271,7 @@ def update_layout(fig,
 
     # Vertical lines for nowcast and forecast
     fig.add_shape(
-        type='line', 
+        type='line',
         line=dict(
             color=color_nowcast,
             width=4,
