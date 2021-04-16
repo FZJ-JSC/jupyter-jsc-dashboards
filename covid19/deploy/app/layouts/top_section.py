@@ -54,6 +54,34 @@ explanations_bstim = html.Div([
 
 
 # Vorhersage und Analyse
+youtube_video = dash_player.DashPlayer(
+    id="video-player",
+    url="https://youtu.be/0jvH3nkjR9I",
+    controls=True,
+    playing=True
+)
+
+youtube_screenshot = html.Img(
+    id="video-screenshot",
+    src="assets/video.png",
+    width="100%", height="100%"
+)
+
+youtube_consent_overlay = html.Div(
+    [
+        html.I(className="play"),
+        html.Span("""
+            Klicken Sie auf den Video-Banner, um das YouTube-Video zu laden 
+            und das Video zu starten. Damit akzeptieren Sie die 
+            Datenschutzerklärung von YouTube.
+            """, className="text-center")
+    ],
+    className="overlay",
+    id="youtube-consent-overlay",
+    title="YouTube-Video laden und starten"
+)
+
+
 explanations_right = html.Div([
     html.Hr(),
     dbc.Row(
@@ -72,11 +100,13 @@ explanations_right = html.Div([
             'margin': '0% 0% 5% 0%'  # top, right, bottom, left
         },
         children=[
-            dash_player.DashPlayer(
-                id='video-player',
-                url="https://youtu.be/0jvH3nkjR9I",
-                controls=True,
-                width='100%'
+            html.Div(
+                [
+                    youtube_screenshot,
+                    youtube_consent_overlay
+                ],
+                id="video-container",
+                className="video-container"
             ),
             dcc.Markdown(
                 f"""
