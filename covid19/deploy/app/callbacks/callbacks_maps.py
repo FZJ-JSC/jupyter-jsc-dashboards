@@ -14,17 +14,69 @@ from plotly_figures.maps import create_map_figure
 
 logger = setup_logger()
 
+def calculate_daily_zmax_values(mapcsv_path):
+    columns = [
+        '7DayInf100k', 'newInf100k', '7DayInfRaw', 'newInfRaw',
+        '7DayInf100k_RKI', 'newInf100k_RKI', '7DayInfRaw_RKI', 'newInfRaw_RKI'
+    ]
+
+    zmax_dict = {col: 0 for col in columns}
+
+    mapcsv = pd.read_csv(mapcsv_path)
+
+    for column in columns:
+        # Get no. infections for each county from mapcsv 
+        for feat in counties_geojson['features']:
+            # Need the county id to find the corresponding value in mapcsv
+            cca_str = feat['properties'].get('RS')
+            if cca_str is not None:
+                try:
+                    cca_filtered_df = mapcsv.loc[mapcsv['countyID']==int(cca_str), column]
+                except KeyError as e:
+                    if e.args[0] == '7DayInfRaw_RKI':
+                        cca_filtered_df = mapcsv.loc[mapcsv['countyID']==int(cca_str), '7DayInf100kRaw_RKI']
+                    elif e.args[0] == 'newInfRaw_RKI':
+                        cca_filtered_df = mapcsv.loc[mapcsv['countyID']==int(cca_str), 'newInf100kRaw_RKI']
+                cca_value = next(iter(cca_filtered_df), 0.0)
+                if cca_value > zmax_dict[column]:
+                    zmax_dict[column] = cca_value
+
+    if zmax_dict['7DayInf100k'] > zmax_dict['7DayInf100k_RKI']:
+        zmax_dict['7DayInf100k_RKI'] = zmax_dict['7DayInf100k']
+    else:
+        zmax_dict['7DayInf100k'] = zmax_dict['7DayInf100k_RKI']
+
+    if zmax_dict['newInf100k'] > zmax_dict['newInf100k_RKI']:
+        zmax_dict['newInf100k_RKI'] = zmax_dict['newInf100k']
+    else:
+        zmax_dict['newInf100k'] = zmax_dict['newInf100k_RKI']
+
+    if zmax_dict['7DayInfRaw'] > zmax_dict['7DayInfRaw_RKI']:
+        zmax_dict['7DayInfRaw_RKI'] = zmax_dict['7DayInfRaw']
+    else:
+        zmax_dict['7DayInfRaw'] = zmax_dict['7DayInfRaw_RKI']
+
+    if zmax_dict['newInfRaw'] > zmax_dict['newInfRaw_RKI']:
+        zmax_dict['newInfRaw_RKI'] = zmax_dict['newInfRaw']
+    else:
+        zmax_dict['newInfRaw'] = zmax_dict['newInfRaw_RKI']
+
+    return zmax_dict
+
+
 def update_map_figure(assets_dir, column, zmax=None,
                       seven_days=False, incidence_values=False):
     selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
     assets_datadir = get_assets_datadir(selected_date)
     mapcsv_path = "assets/" + assets_datadir + "map.csv"
     logger.debug("Update map: Looking for {}".format(mapcsv_path))
+
+    zmax_dict = calculate_daily_zmax_values(mapcsv_path)
     mapfig = create_map_figure(
         counties_geojson, counties_metadf, mapcsv_path, 
         column=column, n_people=n_people_df,
         seven_days=seven_days, incidence_values=incidence_values,
-        zmax=zmax
+        zmax=zmax_dict[column]
     )
     return mapfig
 
@@ -100,7 +152,7 @@ for side in ['left', 'right']:
             }
 
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
-        if (threshold_date is not None) and (selected_date <= threshold_date):            
+        if (threshold_date is not None) and (selected_date <= threshold_date):
             bstim_map = update_map_figure(
                 assets_dir, column='newInf100k', incidence_values=False) #, zmax=100)
             return bstim_map
@@ -187,5 +239,3 @@ for side in ['left', 'right']:
         [Input(f"rki_map_tab_{side}_graph", 'clickData'),
          Input(f"bstim_map_tab_{side}_graph", 'clickData')]
     )(update_mapclick)
-    
-    
