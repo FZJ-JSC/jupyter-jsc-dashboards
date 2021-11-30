@@ -12,9 +12,7 @@ from app import threshold_date
 from callbacks.logging import setup_logger
 from plotly_figures.maps import create_map_figure
 
-
 logger = setup_logger()
-
 
 def update_map_figure(assets_dir, column, zmax=None,
                       seven_days=False, incidence_values=False):
@@ -104,18 +102,18 @@ for side in ['left', 'right']:
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):            
             bstim_map = update_map_figure(
-                assets_dir, column='newInf100k', incidence_values=False, zmax=100)
+                assets_dir, column='newInf100k', incidence_values=False) #, zmax=100)
             return bstim_map
 
         if btn_color_incidence == 'primary':  # incidence values selected
             if not switch_value:  # 7 day values selected
                 bstim_map = update_map_figure(
                     assets_dir, column='7DayInf100k', 
-                    seven_days=True, incidence_values=True, zmax=250)
+                    seven_days=True, incidence_values=True) #, zmax=250)
             else:  # per day values selected
                 bstim_map = update_map_figure(
                     assets_dir, column='newInf100k', 
-                    incidence_values=True, zmax=100)
+                    incidence_values=True) #, zmax=100)
 
         else:  # Number of cases selected
             if not switch_value:   # 7 day values selected
@@ -161,11 +159,11 @@ for side in ['left', 'right']:
             if not switch_value:  # 7 day values selected
                 rki_map = update_map_figure(
                     assets_dir, column='7DayInf100k_RKI',
-                    seven_days=True, incidence_values=True, zmax=250)
+                    seven_days=True, incidence_values=True) #, zmax=250)
             else:  # per day values selected
                 rki_map = update_map_figure(
                     assets_dir, column='newInf100k_RKI', 
-                    incidence_values=True, zmax=100)
+                    incidence_values=True) #, zmax=100)
 
         else:  # Number of cases selected
             if not switch_value:   # 7 day values selected
