@@ -161,9 +161,11 @@ body_layout = dbc.Container(
                                                     label="Interaktionskernel",
                                                 )
                                             ]),
+                                    dcc.Store(id='zmax_values_left'),
                                     html.P(
                                         id='card_separator_left',
                                         className='card-text',
+                                        style={'text-align': 'end'}
                                     ),
                                 ]),
                             # Ortsangabe
@@ -238,9 +240,11 @@ body_layout = dbc.Container(
                                                     label="Interaktionskernel",
                                                 ),
                                             ]),
+                                    dcc.Store(id='zmax_values_right'),
                                     html.P(
                                         id='card_separator_right',
                                         className='card-text',
+                                        style={'text-align': 'end'}
                                     ),
                                 ]),
                             # Ortsangabe

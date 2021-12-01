@@ -76,7 +76,7 @@ def create_map_figure(counties_geojson, counties_metadf, mapcsv_path,
         counties_geojson, mapcsv_path, column)
     if zmax is None:
         zmax = counties_infectionsdf.max().tolist()[0]
-        zmax = (zmax + 90) // 100 * 100
+    zmax = (zmax + 90) // 100 * 100
 
     if incidence_values:
         colorscale = 'YlOrRd'

@@ -1,5 +1,6 @@
 import dash
 import dash_core_components as dcc
+import dash_html_components as html
 import pandas as pd
 
 from dash.dependencies import Input, Output, State
@@ -14,7 +15,7 @@ from plotly_figures.maps import create_map_figure
 
 logger = setup_logger()
 
-def calculate_daily_zmax_values(mapcsv_path):
+def calculate_daily_zmax_values(assets_dir):
     columns = [
         '7DayInf100k', 'newInf100k', '7DayInfRaw', 'newInfRaw',
         '7DayInf100k_RKI', 'newInf100k_RKI', '7DayInfRaw_RKI', 'newInfRaw_RKI'
@@ -22,6 +23,9 @@ def calculate_daily_zmax_values(mapcsv_path):
 
     zmax_dict = {col: 0 for col in columns}
 
+    selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
+    assets_datadir = get_assets_datadir(selected_date)
+    mapcsv_path = "assets/" + assets_datadir + "map.csv"
     mapcsv = pd.read_csv(mapcsv_path)
 
     for column in columns:
@@ -71,12 +75,11 @@ def update_map_figure(assets_dir, column, zmax=None,
     mapcsv_path = "assets/" + assets_datadir + "map.csv"
     logger.debug("Update map: Looking for {}".format(mapcsv_path))
 
-    zmax_dict = calculate_daily_zmax_values(mapcsv_path)
     mapfig = create_map_figure(
         counties_geojson, counties_metadf, mapcsv_path, 
         column=column, n_people=n_people_df,
         seven_days=seven_days, incidence_values=incidence_values,
-        zmax=zmax_dict[column]
+        zmax=zmax
     )
     return mapfig
 
@@ -126,17 +129,29 @@ for side in ['left', 'right']:
         if active_tab == 'tab-1':
             return '', 'tab-1'
 
+    
+    # Calculate daily zmax_values and save them in hidden div
+    @app.callback(
+        Output(f"zmax_values_{side}", 'data'),
+        Input(f"date_picker_{side}_output_container", 'children')
+    )
+    @cache.memoize(timeout=cache_timeout)
+    def update_zmax_values(assets_dir):
+        return calculate_daily_zmax_values(assets_dir)
+
+
     # Update map figure
     @app.callback(
         Output(f"bstim_map_tab_{side}_graph", 'figure'),
         # When the button color changes, we toggled incidence values
         Input(f"bstim_map_tab_{side}_dummy_div", 'children'),
+        Input(f"zmax_values_{side}", 'data'),
         [State(f"toggle_{side}_incidence", 'color'),
          State(f"toggle_{side}_7_days_switch", 'on'),
          State(f"date_picker_{side}_output_container", 'children')],
     )
     @cache.memoize(timeout=cache_timeout)
-    def update_bstim_maps(dummy_div, btn_color_incidence, switch_value, assets_dir):
+    def update_bstim_maps(dummy_div, zmax_values, btn_color_incidence, switch_value, assets_dir):
         if dummy_div == '':
             # Return an empty graph to prevent briefly seeing old map
             return {
@@ -154,39 +169,42 @@ for side in ['left', 'right']:
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):
             bstim_map = update_map_figure(
-                assets_dir, column='newInf100k', incidence_values=False) #, zmax=100)
+                assets_dir, column='newInf100k', incidence_values=False, 
+                zmax=zmax_values['newInf100k'])
             return bstim_map
 
         if btn_color_incidence == 'primary':  # incidence values selected
             if not switch_value:  # 7 day values selected
                 bstim_map = update_map_figure(
-                    assets_dir, column='7DayInf100k', 
-                    seven_days=True, incidence_values=True) #, zmax=250)
+                    assets_dir, column='7DayInf100k', seven_days=True, 
+                    incidence_values=True, zmax=zmax_values['7DayInf100k'])
             else:  # per day values selected
                 bstim_map = update_map_figure(
                     assets_dir, column='newInf100k', 
-                    incidence_values=True) #, zmax=100)
+                    incidence_values=True, zmax=zmax_values['newInf100k'])
 
         else:  # Number of cases selected
             if not switch_value:   # 7 day values selected
                 bstim_map = update_map_figure(
-                    assets_dir, column='7DayInfRaw', seven_days=True)
+                    assets_dir, column='7DayInfRaw', seven_days=True, zmax=zmax_values['7DayInfRaw'])
             else:  # per day values selected               
-                bstim_map = update_map_figure(assets_dir, column='newInfRaw')
+                bstim_map = update_map_figure(
+                    assets_dir, column='newInfRaw', zmax=zmax_values['newInfRaw'])
         return bstim_map
         
-        
+
     # Update map figure
     @app.callback(
          Output(f"rki_map_tab_{side}_graph", 'figure'),
         # When the button color changes, we toggled incidence values
         Input(f"rki_map_tab_{side}_dummy_div", 'children'),
+        Input(f"zmax_values_{side}", 'data'),
         [State(f"toggle_{side}_incidence", 'color'),
          State(f"toggle_{side}_7_days_switch", 'on'),
          State(f"date_picker_{side}_output_container", 'children')],
     )
     @cache.memoize(timeout=cache_timeout)
-    def update_rki_maps(dummy_div, btn_color_incidence, switch_value, assets_dir):
+    def update_rki_maps(dummy_div, zmax_values, btn_color_incidence, switch_value, assets_dir):
         if dummy_div == '':
             # Return an empty graph to prevent briefly seeing old map
             return {
@@ -204,38 +222,69 @@ for side in ['left', 'right']:
         selected_date = dt.strptime(assets_dir, '%Y_%m_%d/')
         if (threshold_date is not None) and (selected_date <= threshold_date):
             rki_map = update_map_figure(
-                assets_dir, column='newInf100k_RKI', incidence_values=False)
+                assets_dir, column='newInf100k_RKI', incidence_values=False, 
+                zmax=zmax_values['newInf100k_RKI'])
             return bstim_map, rki_map
 
         if btn_color_incidence == 'primary':  # incidence values selected
             if not switch_value:  # 7 day values selected
                 rki_map = update_map_figure(
                     assets_dir, column='7DayInf100k_RKI',
-                    seven_days=True, incidence_values=True) #, zmax=250)
+                    seven_days=True, incidence_values=True, zmax=zmax_values['7DayInf100k_RKI'])
             else:  # per day values selected
                 rki_map = update_map_figure(
                     assets_dir, column='newInf100k_RKI', 
-                    incidence_values=True) #, zmax=100)
+                    incidence_values=True, zmax=zmax_values['newInf100k_RKI'])
 
         else:  # Number of cases selected
             if not switch_value:   # 7 day values selected
                 try:
                     rki_map = update_map_figure(
-                        assets_dir, column='7DayInfRaw_RKI', seven_days=True)
+                        assets_dir, column='7DayInfRaw_RKI', seven_days=True, 
+                        zmax=zmax_values['7DayInfRaw_RKI'])
                 except KeyError:
                     rki_map = update_map_figure(
-                        assets_dir, column='7DayInf100kRaw_RKI', seven_days=True)
+                        assets_dir, column='7DayInf100kRaw_RKI', seven_days=True, 
+                        zmax=zmax_values['7DayInfRaw_RKI'])
             else:  # per day values selected
                 try:
-                    rki_map = update_map_figure(assets_dir, column='newInfRaw_RKI')
+                    rki_map = update_map_figure(assets_dir, column='newInfRaw_RKI', 
+                    zmax=zmax_values['newInfRaw_RKI'])
                 except KeyError:
-                    rki_map = update_map_figure(assets_dir, column='newInf100kRaw_RKI')
+                    rki_map = update_map_figure(assets_dir, column='newInf100kRaw_RKI', 
+                    zmax=zmax_values['newInfRaw_RKI'])
         return rki_map
             
 
+    # Update scale text
+    @app.callback(
+        Output(f"card_separator_{side}", 'children'),
+        Input(f"toggle_{side}_incidence", 'color'),
+        Input(f"toggle_{side}_7_days_switch", 'on'),
+        Input(f"zmax_values_{side}", 'data')
+    )
+    def update_scale_text(btn_color_incidence, switch_value, zmax_values):
+        if zmax_values == None:
+            return ''
+
+        if btn_color_incidence == 'primary':  # incidence values selected
+            if not switch_value:  # 7 day values selected
+                zmax = zmax_values['7DayInf100k']
+            else:  # per day values selected
+                zmax = zmax_values['newInf100k']
+        else:  # Number of cases selected
+            if not switch_value:  # 7 day values selected
+                zmax = zmax_values['7DayInfRaw']
+            else:  # per day values selected
+                zmax = zmax_values['newInfRaw']
+        zmax = (zmax + 90) // 100 * 100
+        return html.Small(f"Skala variiert - aktuell: 0 bis {int(zmax)}")
+
+    
     # Update dropbox value
     app.callback(
         Output(f"pos_control_{side}_variable", 'value'),
         [Input(f"rki_map_tab_{side}_graph", 'clickData'),
          Input(f"bstim_map_tab_{side}_graph", 'clickData')]
     )(update_mapclick)
+
